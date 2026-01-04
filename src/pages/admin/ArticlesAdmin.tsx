@@ -24,6 +24,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 interface Article {
   id: string;
@@ -228,13 +230,14 @@ export default function ArticlesAdmin() {
               مقال جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
             <DialogHeader>
               <DialogTitle>
                 {editingArticle ? 'تعديل المقال' : 'إضافة مقال جديد'}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
+            <div className="space-y-6 mt-4">
+              {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">العنوان</Label>
                 <Input
@@ -244,6 +247,8 @@ export default function ArticlesAdmin() {
                   placeholder="عنوان المقال"
                 />
               </div>
+
+              {/* Slug */}
               <div className="space-y-2">
                 <Label htmlFor="slug">الرابط</Label>
                 <Input
@@ -254,36 +259,38 @@ export default function ArticlesAdmin() {
                   dir="ltr"
                 />
               </div>
+
+              {/* Featured Image */}
+              <div className="space-y-2">
+                <Label>صورة المقال الرئيسية</Label>
+                <ImageUpload
+                  value={formData.image_url}
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                />
+              </div>
+
+              {/* Excerpt */}
               <div className="space-y-2">
                 <Label htmlFor="excerpt">الملخص</Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
                   onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  placeholder="ملخص قصير للمقال"
+                  placeholder="ملخص قصير للمقال يظهر في قائمة المقالات"
                   rows={2}
                 />
               </div>
+
+              {/* Content Editor */}
               <div className="space-y-2">
-                <Label htmlFor="content">المحتوى</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="محتوى المقال"
-                  rows={8}
+                <Label>المحتوى</Label>
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => setFormData({ ...formData, content })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="image_url">رابط الصورة</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://..."
-                  dir="ltr"
-                />
-              </div>
+
+              {/* Published Toggle */}
               <div className="flex items-center gap-3">
                 <Switch
                   id="published"
@@ -292,6 +299,8 @@ export default function ArticlesAdmin() {
                 />
                 <Label htmlFor="published">منشور</Label>
               </div>
+
+              {/* Save Button */}
               <Button onClick={handleSave} disabled={saving} className="w-full">
                 {saving && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
                 {editingArticle ? 'تحديث' : 'إضافة'}
@@ -316,6 +325,7 @@ export default function ArticlesAdmin() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>الصورة</TableHead>
                   <TableHead>العنوان</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead>التاريخ</TableHead>
@@ -325,7 +335,22 @@ export default function ArticlesAdmin() {
               <TableBody>
                 {articles.map((article) => (
                   <TableRow key={article.id}>
-                    <TableCell className="font-medium">{article.title}</TableCell>
+                    <TableCell>
+                      {article.image_url ? (
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="w-16 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-16 h-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                          لا صورة
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium max-w-[200px] truncate">
+                      {article.title}
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded text-xs ${
