@@ -71,6 +71,75 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          cook_time: number | null
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          fat: number | null
+          fiber: number | null
+          id: string
+          image_url: string | null
+          ingredients: Json | null
+          instructions: Json | null
+          prep_time: number | null
+          protein: number | null
+          published: boolean | null
+          servings: number | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          cook_time?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          fiber?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json | null
+          instructions?: Json | null
+          prep_time?: number | null
+          protein?: number | null
+          published?: boolean | null
+          servings?: number | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          cook_time?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          fiber?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json | null
+          instructions?: Json | null
+          prep_time?: number | null
+          protein?: number | null
+          published?: boolean | null
+          servings?: number | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_visits: {
         Row: {
           id: string
