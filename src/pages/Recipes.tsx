@@ -1,147 +1,88 @@
 import { Helmet } from 'react-helmet-async';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Clock, Flame, ChefHat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import Layout from '@/components/layout/Layout';
 
-const categories = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Smoothies', 'Desserts'];
-const diets = ['All Diets', 'Keto', 'Vegan', 'Vegetarian', 'Low Carb', 'High Protein', 'Gluten Free'];
+interface Recipe {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  prep_time: number | null;
+  cook_time: number | null;
+  servings: number | null;
+  difficulty: string | null;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  tags: string[] | null;
+}
 
-const recipes = [
-  {
-    id: 1,
-    title: 'Mediterranean Quinoa Power Bowl',
-    description: 'A nutritious bowl packed with protein-rich quinoa, fresh vegetables, and a zesty lemon dressing.',
-    category: 'Lunch',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
-    calories: 420,
-    protein: 18,
-    carbs: 52,
-    fat: 16,
-    time: '25 min',
-    difficulty: 'Easy',
-    tags: ['High Protein', 'Vegan'],
-  },
-  {
-    id: 2,
-    title: 'Grilled Salmon with Avocado Salsa',
-    description: 'Perfectly grilled salmon topped with fresh avocado salsa for a healthy omega-3 rich meal.',
-    category: 'Dinner',
-    image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80',
-    calories: 380,
-    protein: 35,
-    carbs: 12,
-    fat: 22,
-    time: '20 min',
-    difficulty: 'Medium',
-    tags: ['Keto', 'High Protein'],
-  },
-  {
-    id: 3,
-    title: 'Green Detox Smoothie',
-    description: 'A refreshing blend of spinach, banana, and ginger to kickstart your morning.',
-    category: 'Smoothies',
-    image: 'https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=600&q=80',
-    calories: 180,
-    protein: 5,
-    carbs: 35,
-    fat: 3,
-    time: '5 min',
-    difficulty: 'Easy',
-    tags: ['Vegan', 'Low Calorie'],
-  },
-  {
-    id: 4,
-    title: 'Overnight Oats with Mixed Berries',
-    description: 'Creamy overnight oats topped with fresh berries and a drizzle of honey.',
-    category: 'Breakfast',
-    image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-    calories: 310,
-    protein: 12,
-    carbs: 48,
-    fat: 8,
-    time: '10 min',
-    difficulty: 'Easy',
-    tags: ['Fiber Rich', 'Vegetarian'],
-  },
-  {
-    id: 5,
-    title: 'Chicken Avocado Caesar Salad',
-    description: 'Classic Caesar salad with grilled chicken, creamy avocado, and homemade dressing.',
-    category: 'Lunch',
-    image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&q=80',
-    calories: 450,
-    protein: 38,
-    carbs: 15,
-    fat: 28,
-    time: '15 min',
-    difficulty: 'Easy',
-    tags: ['High Protein', 'Low Carb'],
-  },
-  {
-    id: 6,
-    title: 'Zucchini Noodles with Pesto',
-    description: 'Light and healthy zucchini noodles tossed in fresh basil pesto sauce.',
-    category: 'Dinner',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80',
-    calories: 280,
-    protein: 8,
-    carbs: 18,
-    fat: 20,
-    time: '20 min',
-    difficulty: 'Easy',
-    tags: ['Keto', 'Gluten Free'],
-  },
-  {
-    id: 7,
-    title: 'Protein Energy Balls',
-    description: 'No-bake protein balls made with oats, peanut butter, and dark chocolate chips.',
-    category: 'Snacks',
-    image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=600&q=80',
-    calories: 150,
-    protein: 6,
-    carbs: 18,
-    fat: 7,
-    time: '15 min',
-    difficulty: 'Easy',
-    tags: ['High Protein', 'No Bake'],
-  },
-  {
-    id: 8,
-    title: 'Chia Seed Pudding',
-    description: 'Creamy coconut chia pudding topped with fresh mango and toasted coconut.',
-    category: 'Desserts',
-    image: 'https://images.unsplash.com/photo-1546039907-7fa05f864c02?w=600&q=80',
-    calories: 220,
-    protein: 6,
-    carbs: 28,
-    fat: 10,
-    time: '5 min + overnight',
-    difficulty: 'Easy',
-    tags: ['Vegan', 'Gluten Free'],
-  },
-];
+const diets = ['All Diets', 'Vegan', 'Vegetarian', 'Keto', 'Low-Carb', 'High-Protein', 'Gluten-Free'];
 
 const Recipes = () => {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDiet, setSelectedDiet] = useState('All Diets');
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, title, slug, description, image_url, prep_time, cook_time, servings, difficulty, calories, protein, carbs, fat, tags')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setRecipes(data);
+      }
+      setLoading(false);
+    };
+
+    fetchRecipes();
+  }, []);
 
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
-    const matchesDiet = selectedDiet === 'All Diets' || recipe.tags.some(tag => 
-      tag.toLowerCase().includes(selectedDiet.toLowerCase().replace(' ', ''))
-    );
-    return matchesSearch && matchesCategory && matchesDiet;
+      (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesDiet = selectedDiet === 'All Diets' || 
+      (recipe.tags && recipe.tags.some(tag => 
+        tag.toLowerCase().includes(selectedDiet.toLowerCase().replace('-', ''))
+      ));
+    return matchesSearch && matchesDiet;
   });
 
+  const formatTime = (prepTime: number | null, cookTime: number | null) => {
+    const total = (prepTime || 0) + (cookTime || 0);
+    if (total >= 60) {
+      const hours = Math.floor(total / 60);
+      const mins = total % 60;
+      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+    return `${total} min`;
+  };
+
+  const getDifficultyLabel = (difficulty: string | null) => {
+    switch (difficulty) {
+      case 'easy': return 'Easy';
+      case 'medium': return 'Medium';
+      case 'hard': return 'Hard';
+      default: return 'Easy';
+    }
+  };
+
   return (
-    <>
+    <Layout>
       <Helmet>
         <title>Healthy Recipes | HealthyLife Hub</title>
         <meta name="description" content="Discover delicious and nutritious recipes for every meal. From quick breakfasts to healthy dinners, find recipes with full nutritional information." />
@@ -177,38 +118,19 @@ const Recipes = () => {
       {/* Filters */}
       <section className="border-b border-border sticky top-16 md:top-20 bg-background/95 backdrop-blur-sm z-40">
         <div className="container-custom py-4">
-          <div className="space-y-3">
-            {/* Category Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="flex-shrink-0"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-            
-            {/* Diet Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <ChefHat className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              {diets.map((diet) => (
-                <Button
-                  key={diet}
-                  variant={selectedDiet === diet ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedDiet(diet)}
-                  className="flex-shrink-0"
-                >
-                  {diet}
-                </Button>
-              ))}
-            </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <ChefHat className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            {diets.map((diet) => (
+              <Button
+                key={diet}
+                variant={selectedDiet === diet ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setSelectedDiet(diet)}
+                className="flex-shrink-0"
+              >
+                {diet}
+              </Button>
+            ))}
           </div>
         </div>
       </section>
@@ -222,24 +144,44 @@ const Recipes = () => {
             </p>
           </div>
 
-          {filteredRecipes.length > 0 ? (
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                  <CardContent className="p-4 space-y-3">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <div className="grid grid-cols-4 gap-2 pt-3">
+                      {[1, 2, 3, 4].map((j) => (
+                        <Skeleton key={j} className="h-10 w-full" />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredRecipes.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredRecipes.map((recipe) => (
-                <Link key={recipe.id} to={`/recipes/${recipe.id}`} className="group">
+                <Link key={recipe.id} to={`/recipes/${recipe.slug}`} className="group">
                   <Card className="overflow-hidden card-hover h-full border-border">
                     <div className="relative overflow-hidden">
                       <img
-                        src={recipe.image}
+                        src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}
                         alt={recipe.title}
                         className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
                         <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs font-medium text-foreground">{recipe.time}</span>
+                        <span className="text-xs font-medium text-foreground">
+                          {formatTime(recipe.prep_time, recipe.cook_time)}
+                        </span>
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                         <div className="flex gap-1.5 flex-wrap">
-                          {recipe.tags.slice(0, 2).map((tag) => (
+                          {recipe.tags?.slice(0, 2).map((tag) => (
                             <span key={tag} className="px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs rounded-full">
                               {tag}
                             </span>
@@ -249,7 +191,7 @@ const Recipes = () => {
                     </div>
                     <CardContent className="p-4">
                       <Badge variant="outline" className="mb-2 text-xs">
-                        {recipe.category}
+                        {getDifficultyLabel(recipe.difficulty)}
                       </Badge>
                       <h3 className="font-serif font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
                         {recipe.title}
@@ -261,20 +203,20 @@ const Recipes = () => {
                       {/* Nutritional Info */}
                       <div className="grid grid-cols-4 gap-2 pt-3 border-t border-border">
                         <div className="text-center">
-                          <Flame className="w-4 h-4 mx-auto text-health-orange mb-1" />
-                          <p className="text-xs font-medium text-foreground">{recipe.calories}</p>
+                          <Flame className="w-4 h-4 mx-auto text-orange-500 mb-1" />
+                          <p className="text-xs font-medium text-foreground">{recipe.calories || 0}</p>
                           <p className="text-[10px] text-muted-foreground">cal</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-xs font-medium text-foreground">{recipe.protein}g</p>
+                          <p className="text-xs font-medium text-foreground">{recipe.protein || 0}g</p>
                           <p className="text-[10px] text-muted-foreground">protein</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-xs font-medium text-foreground">{recipe.carbs}g</p>
+                          <p className="text-xs font-medium text-foreground">{recipe.carbs || 0}g</p>
                           <p className="text-[10px] text-muted-foreground">carbs</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-xs font-medium text-foreground">{recipe.fat}g</p>
+                          <p className="text-xs font-medium text-foreground">{recipe.fat || 0}g</p>
                           <p className="text-[10px] text-muted-foreground">fat</p>
                         </div>
                       </div>
@@ -290,7 +232,7 @@ const Recipes = () => {
           )}
         </div>
       </section>
-    </>
+    </Layout>
   );
 };
 
