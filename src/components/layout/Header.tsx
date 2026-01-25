@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Leaf, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
+import logo from '@/assets/logo.png';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -29,19 +30,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-                <Leaf className="w-6 h-6 text-primary-foreground" />
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-serif text-xl font-bold text-foreground">
-                Healthy<span className="text-primary">Life</span>
-              </span>
-              <span className="hidden md:block text-xs text-muted-foreground -mt-1">
-                Your Wellness Journey
-              </span>
-            </div>
+            <img 
+              src={logo} 
+              alt="Healthy Life Hub" 
+              className="h-12 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Navigation */}
