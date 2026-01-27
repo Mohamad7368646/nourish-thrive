@@ -33,8 +33,16 @@ const Header = () => {
             <img 
               src={logo} 
               alt="Healthy Life Hub" 
-              className="h-12 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
+            <div className="hidden sm:block">
+              <span className="font-serif text-xl font-bold text-foreground">
+                Healthy<span className="text-primary">Life</span>
+              </span>
+              <span className="hidden md:block text-xs text-muted-foreground -mt-1">
+                Your Wellness Journey
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
