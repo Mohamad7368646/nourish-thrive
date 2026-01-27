@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import logo from '@/assets/logo.png';
+import SearchDialog from '@/components/search/SearchDialog';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -16,6 +17,7 @@ const navigation = [
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
 
@@ -64,6 +66,16 @@ const Header = () => {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
+            {/* Search Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearchOpen(true)}
+              className="rounded-lg"
+            >
+              <Search className="w-5 h-5" />
+            </Button>
+
             {/* Theme Toggle */}
             <Button
               variant="ghost"
@@ -116,6 +128,9 @@ const Header = () => {
           </div>
         )}
       </nav>
+
+      {/* Search Dialog */}
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 };
