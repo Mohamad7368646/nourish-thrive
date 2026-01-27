@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Utensils, BookOpen, Calculator, Heart, Users, TrendingUp, Leaf, Apple, Dumbbell } from 'lucide-react';
+import SeasonalRecipesSection from '@/components/home/SeasonalRecipesSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -326,6 +327,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Seasonal Recipes Section */}
+      <SeasonalRecipesSection />
 
       {/* Featured Recipes Section */}
       <section className="section-padding">
