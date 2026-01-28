@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, FileText, UtensilsCrossed, Loader2 } from 'lucide-react';
+import { Search, X, FileText, UtensilsCrossed, Loader2, TrendingUp, Clock, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface SearchResult {
   id: string;
@@ -32,6 +33,62 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch popular/recent content for suggestions
+  const { data: suggestions } = useQuery({
+    queryKey: ['search-suggestions'],
+    queryFn: async () => {
+      const [articlesRes, recipesRes] = await Promise.all([
+        supabase
+          .from('articles')
+          .select('id, title, slug, image_url')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(4),
+        supabase
+          .from('recipes')
+          .select('id, title, slug, image_url, tags')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(4),
+      ]);
+
+      return {
+        recentArticles: articlesRes.data || [],
+        recentRecipes: recipesRes.data || [],
+      };
+    },
+    enabled: open,
+  });
+
+  // Extract popular tags from recipes
+  const popularTags = useMemo(() => {
+    if (!suggestions?.recentRecipes) return [];
+    const tagCounts: Record<string, number> = {};
+    suggestions.recentRecipes.forEach(recipe => {
+      recipe.tags?.forEach(tag => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+    });
+    return Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([tag]) => tag);
+  }, [suggestions]);
+
+  // Autocomplete suggestions based on query
+  const autocompleteSuggestions = useMemo(() => {
+    if (!query.trim() || query.length < 2) return [];
+    
+    const allTitles = [
+      ...(suggestions?.recentArticles?.map(a => ({ title: a.title, type: 'article' as const, slug: a.slug })) || []),
+      ...(suggestions?.recentRecipes?.map(r => ({ title: r.title, type: 'recipe' as const, slug: r.slug })) || []),
+    ];
+    
+    return allTitles
+      .filter(item => item.title.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 5);
+  }, [query, suggestions]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -95,6 +152,23 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
     setQuery('');
   };
 
+  const handleSuggestionClick = (slug: string, type: 'article' | 'recipe') => {
+    const path = type === 'article' ? `/articles/${slug}` : `/recipes/${slug}`;
+    navigate(path);
+    onOpenChange(false);
+    setQuery('');
+  };
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/search?tag=${encodeURIComponent(tag)}`);
+    onOpenChange(false);
+    setQuery('');
+  };
+
+  const handleAutocompleteClick = (item: { title: string; type: 'article' | 'recipe'; slug: string }) => {
+    handleSuggestionClick(item.slug, item.type);
+  };
+
   const articleCount = results.filter(r => r.type === 'article').length;
   const recipeCount = results.filter(r => r.type === 'recipe').length;
 
@@ -126,7 +200,33 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
           )}
         </div>
 
-        {query && (
+        {/* Autocomplete Suggestions */}
+        {query && autocompleteSuggestions.length > 0 && !loading && results.length === 0 && (
+          <div className="border rounded-lg p-2 bg-muted/30">
+            <p className="text-xs text-muted-foreground px-2 mb-2 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              اقتراحات
+            </p>
+            <div className="space-y-1">
+              {autocompleteSuggestions.map((item) => (
+                <button
+                  key={`${item.type}-${item.slug}`}
+                  onClick={() => handleAutocompleteClick(item)}
+                  className="w-full flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors text-right text-sm"
+                >
+                  {item.type === 'article' ? (
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <UtensilsCrossed className="w-4 h-4 text-muted-foreground" />
+                  )}
+                  <span>{item.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {query && results.length > 0 && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="all" className="gap-2">
@@ -209,11 +309,104 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
           </Tabs>
         )}
 
+        {query && loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
+
         {!query && (
-          <div className="text-center py-8 text-muted-foreground">
-            <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
-            <p className="text-lg">ابدأ الكتابة للبحث</p>
-            <p className="text-sm mt-2">ابحث في المقالات والوصفات الصحية</p>
+          <div className="space-y-6 py-4 overflow-y-auto">
+            {/* Popular Tags */}
+            {popularTags.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  التصنيفات الشائعة
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {popularTags.map((tag) => (
+                    <Button
+                      key={tag}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTagClick(tag)}
+                      className="rounded-full"
+                    >
+                      {tag}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Articles */}
+            {suggestions?.recentArticles && suggestions.recentArticles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  أحدث المقالات
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {suggestions.recentArticles.map((article) => (
+                    <button
+                      key={article.id}
+                      onClick={() => handleSuggestionClick(article.slug, 'article')}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-right"
+                    >
+                      {article.image_url && (
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="w-10 h-10 rounded object-cover flex-shrink-0"
+                        />
+                      )}
+                      <span className="text-sm text-foreground line-clamp-2 flex-1">
+                        {article.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Recipes */}
+            {suggestions?.recentRecipes && suggestions.recentRecipes.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                  <UtensilsCrossed className="w-4 h-4 text-primary" />
+                  أحدث الوصفات
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {suggestions.recentRecipes.map((recipe) => (
+                    <button
+                      key={recipe.id}
+                      onClick={() => handleSuggestionClick(recipe.slug, 'recipe')}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors text-right"
+                    >
+                      {recipe.image_url && (
+                        <img
+                          src={recipe.image_url}
+                          alt={recipe.title}
+                          className="w-10 h-10 rounded object-cover flex-shrink-0"
+                        />
+                      )}
+                      <span className="text-sm text-foreground line-clamp-2 flex-1">
+                        {recipe.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!suggestions?.recentArticles?.length && !suggestions?.recentRecipes?.length && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">ابدأ الكتابة للبحث</p>
+                <p className="text-sm mt-2">ابحث في المقالات والوصفات الصحية</p>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>
