@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Snowflake, Sun, Leaf, Flower2 } from 'lucide-react';
+import { ArrowRight, Snowflake, Sun, Leaf, Flower2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const seasons = [
   {
@@ -12,18 +15,7 @@ const seasons = [
     color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
     borderColor: 'border-blue-200 dark:border-blue-800',
     description: 'وصفات دافئة ومغذية لأيام الشتاء الباردة',
-    recipes: [
-      {
-        title: 'شوربة العدس الدافئة',
-        image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80',
-        time: '30 دقيقة',
-      },
-      {
-        title: 'يخنة الخضار الشتوية',
-        image: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=400&q=80',
-        time: '45 دقيقة',
-      },
-    ],
+    tags: ['winter', 'warm', 'soup'],
   },
   {
     id: 'spring',
@@ -33,18 +25,7 @@ const seasons = [
     color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
     borderColor: 'border-pink-200 dark:border-pink-800',
     description: 'وصفات منعشة بالخضروات الربيعية الطازجة',
-    recipes: [
-      {
-        title: 'سلطة الربيع الخضراء',
-        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80',
-        time: '15 دقيقة',
-      },
-      {
-        title: 'باستا البازلاء والنعناع',
-        image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80',
-        time: '25 دقيقة',
-      },
-    ],
+    tags: ['spring', 'fresh', 'salad'],
   },
   {
     id: 'summer',
@@ -54,18 +35,7 @@ const seasons = [
     color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
     borderColor: 'border-yellow-200 dark:border-yellow-800',
     description: 'وصفات خفيفة ومنعشة لأيام الصيف الحارة',
-    recipes: [
-      {
-        title: 'سموذي الفواكه الاستوائية',
-        image: 'https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=400&q=80',
-        time: '5 دقائق',
-      },
-      {
-        title: 'سلطة البطيخ والفيتا',
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80',
-        time: '10 دقائق',
-      },
-    ],
+    tags: ['summer', 'light', 'smoothie'],
   },
   {
     id: 'autumn',
@@ -75,18 +45,7 @@ const seasons = [
     color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
     borderColor: 'border-orange-200 dark:border-orange-800',
     description: 'وصفات غنية بنكهات الخريف الدافئة',
-    recipes: [
-      {
-        title: 'شوربة اليقطين المحمص',
-        image: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=400&q=80',
-        time: '35 دقيقة',
-      },
-      {
-        title: 'فطيرة التفاح الصحية',
-        image: 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=400&q=80',
-        time: '50 دقيقة',
-      },
-    ],
+    tags: ['autumn', 'pumpkin', 'apple'],
   },
 ];
 
@@ -101,6 +60,37 @@ const SeasonalRecipesSection = () => {
   };
 
   const currentSeason = getCurrentSeason();
+
+  // Fetch recipes from database
+  const { data: recipes, isLoading } = useQuery({
+    queryKey: ['seasonal-recipes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, title, slug, image_url, prep_time, cook_time, tags, difficulty')
+        .eq('published', true)
+        .limit(12);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Group recipes by season (2 per season)
+  const getRecipesForSeason = (seasonId: string) => {
+    if (!recipes) return [];
+    
+    // Distribute recipes evenly across seasons
+    const seasonIndex = seasons.findIndex(s => s.id === seasonId);
+    const startIndex = seasonIndex * 2;
+    return recipes.slice(startIndex, startIndex + 2);
+  };
+
+  const formatTime = (prepTime: number | null, cookTime: number | null) => {
+    const total = (prepTime || 0) + (cookTime || 0);
+    if (total === 0) return '15 دقيقة';
+    return `${total} دقيقة`;
+  };
 
   return (
     <section className="section-padding bg-gradient-to-b from-background to-muted/30">
@@ -118,6 +108,7 @@ const SeasonalRecipesSection = () => {
           {seasons.map((season) => {
             const SeasonIcon = season.icon;
             const isCurrentSeason = season.id === currentSeason;
+            const seasonRecipes = getRecipesForSeason(season.id);
 
             return (
               <Card
@@ -147,30 +138,57 @@ const SeasonalRecipesSection = () => {
 
                   {/* Recipe Previews */}
                   <div className="p-4 pt-2 space-y-3">
-                    {season.recipes.map((recipe, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-3 group/recipe cursor-pointer"
-                      >
-                        <img
-                          src={recipe.image}
-                          alt={recipe.title}
-                          className="w-12 h-12 rounded-lg object-cover transition-transform group-hover/recipe:scale-105"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate group-hover/recipe:text-primary transition-colors">
-                            {recipe.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{recipe.time}</p>
+                    {isLoading ? (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="w-12 h-12 rounded-lg" />
+                          <div className="flex-1">
+                            <Skeleton className="h-4 w-full mb-1" />
+                            <Skeleton className="h-3 w-16" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="w-12 h-12 rounded-lg" />
+                          <div className="flex-1">
+                            <Skeleton className="h-4 w-full mb-1" />
+                            <Skeleton className="h-3 w-16" />
+                          </div>
+                        </div>
+                      </>
+                    ) : seasonRecipes.length > 0 ? (
+                      seasonRecipes.map((recipe) => (
+                        <Link
+                          key={recipe.id}
+                          to={`/recipes/${recipe.slug}`}
+                          className="flex items-center gap-3 group/recipe cursor-pointer"
+                        >
+                          <img
+                            src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'}
+                            alt={recipe.title}
+                            className="w-12 h-12 rounded-lg object-cover transition-transform group-hover/recipe:scale-105"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate group-hover/recipe:text-primary transition-colors">
+                              {recipe.title}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              {formatTime(recipe.prep_time, recipe.cook_time)}
+                            </div>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        لا توجد وصفات متاحة
+                      </p>
+                    )}
                   </div>
 
                   {/* View All Link */}
                   <div className="px-4 pb-4">
                     <Link
-                      to={`/recipes?season=${season.id}`}
+                      to={`/recipes`}
                       className="text-sm text-primary hover:underline flex items-center gap-1"
                     >
                       عرض جميع وصفات {season.name}

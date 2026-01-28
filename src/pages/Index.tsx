@@ -1,73 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Utensils, BookOpen, Calculator, Heart, Users, TrendingUp, Leaf, Apple, Dumbbell } from 'lucide-react';
+import { ArrowRight, Calculator, Heart, Users, TrendingUp, Leaf, Apple, Dumbbell, BookOpen, Utensils } from 'lucide-react';
 import SeasonalRecipesSection from '@/components/home/SeasonalRecipesSection';
+import FeaturedArticles from '@/components/home/FeaturedArticles';
+import FeaturedRecipes from '@/components/home/FeaturedRecipes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-// Featured articles data
-const featuredArticles = [
-  {
-    id: 1,
-    title: '10 Superfoods to Boost Your Immune System',
-    excerpt: 'Discover the most powerful immune-boosting foods that can help protect your health naturally.',
-    category: 'Nutrition',
-    image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&q=80',
-    readTime: '5 min read',
-  },
-  {
-    id: 2,
-    title: 'The Complete Guide to Intermittent Fasting',
-    excerpt: 'Learn everything about intermittent fasting, its benefits, and how to get started safely.',
-    category: 'Weight Loss',
-    image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&q=80',
-    readTime: '8 min read',
-  },
-  {
-    id: 3,
-    title: 'Morning Routines of Healthy People',
-    excerpt: 'Start your day right with these science-backed morning habits for optimal health.',
-    category: 'Lifestyle',
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-    readTime: '6 min read',
-  },
-];
-
-// Featured recipes data
-const featuredRecipes = [
-  {
-    id: 1,
-    title: 'Mediterranean Quinoa Bowl',
-    calories: 420,
-    time: '25 min',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
-    tags: ['High Protein', 'Vegan'],
-  },
-  {
-    id: 2,
-    title: 'Grilled Salmon with Avocado',
-    calories: 380,
-    time: '20 min',
-    image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80',
-    tags: ['Keto', 'Omega-3'],
-  },
-  {
-    id: 3,
-    title: 'Green Detox Smoothie',
-    calories: 180,
-    time: '5 min',
-    image: 'https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=600&q=80',
-    tags: ['Low Calorie', 'Detox'],
-  },
-  {
-    id: 4,
-    title: 'Overnight Oats with Berries',
-    calories: 310,
-    time: '10 min',
-    image: 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=600&q=80',
-    tags: ['Fiber Rich', 'Breakfast'],
-  },
-];
 
 // Tools data
 const tools = [
@@ -223,63 +162,7 @@ const Index = () => {
       </section>
 
       {/* Featured Articles Section */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Latest Articles
-              </h2>
-              <p className="text-muted-foreground">
-                Evidence-based health and nutrition insights
-              </p>
-            </div>
-            <Button asChild variant="ghost" className="hidden sm:flex gap-2">
-              <Link to="/articles">
-                View All <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredArticles.map((article, index) => (
-              <Card 
-                key={article.id} 
-                className="group overflow-hidden card-hover border-border"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt={article.title}
-                    className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                      {article.category}
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-5">
-                  <p className="text-xs text-muted-foreground mb-2">{article.readTime}</p>
-                  <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {article.excerpt}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center sm:hidden">
-            <Button asChild variant="outline">
-              <Link to="/articles">View All Articles</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <FeaturedArticles />
 
       {/* Tools Section */}
       <section className="section-padding bg-muted/50">
@@ -332,67 +215,7 @@ const Index = () => {
       <SeasonalRecipesSection />
 
       {/* Featured Recipes Section */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Healthy Recipes
-              </h2>
-              <p className="text-muted-foreground">
-                Delicious meals that nourish your body
-              </p>
-            </div>
-            <Button asChild variant="ghost" className="hidden sm:flex gap-2">
-              <Link to="/recipes">
-                View All <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredRecipes.map((recipe, index) => (
-              <Card 
-                key={recipe.id} 
-                className="group overflow-hidden card-hover border-border"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={recipe.image}
-                    alt={recipe.title}
-                    className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                    <div className="flex gap-2">
-                      {recipe.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs rounded-full">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-serif font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                    {recipe.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{recipe.calories} cal</span>
-                    <span>{recipe.time}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center sm:hidden">
-            <Button asChild variant="outline">
-              <Link to="/recipes">View All Recipes</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <FeaturedRecipes />
 
       {/* CTA Section */}
       <section className="section-padding bg-primary text-primary-foreground relative overflow-hidden">
