@@ -2,12 +2,14 @@ import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/layout/Layout';
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, ArrowRight, Share2, Bookmark, Loader2 } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Share2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ArticleSchema from '@/components/seo/ArticleSchema';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 interface Article {
   id: string;
@@ -80,6 +82,10 @@ const ArticleDetail = () => {
     });
   };
 
+  const formatDateISO = (dateString: string) => {
+    return new Date(dateString).toISOString();
+  };
+
   const getReadTime = (content: string | null) => {
     if (!content) return '3 دقائق';
     const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
@@ -116,6 +122,10 @@ const ArticleDetail = () => {
   if (!article) {
     return (
       <Layout>
+        <Helmet>
+          <title>المقال غير موجود | Healthy Life Hub</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <div className="min-h-screen flex flex-col items-center justify-center" dir="rtl">
           <h1 className="text-2xl font-serif font-bold mb-4">المقال غير موجود</h1>
           <Link to="/articles">
@@ -126,31 +136,78 @@ const ArticleDetail = () => {
     );
   }
 
+  const articleImage = article.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&h=630&fit=crop';
+  const articleUrl = `/articles/${article.slug}`;
+
   return (
     <>
       <Helmet>
         <title>{article.title} | Healthy Life Hub</title>
+        <meta name="title" content={`${article.title} | Healthy Life Hub`} />
         <meta name="description" content={article.excerpt || ''} />
+        <meta name="keywords" content="صحة, تغذية, مقالات صحية, نصائح طبية, حياة صحية" />
+        <link rel="canonical" href={`https://healthylifehub.com${articleUrl}`} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://healthylifehub.com${articleUrl}`} />
         <meta property="og:title" content={article.title} />
         <meta property="og:description" content={article.excerpt || ''} />
-        <meta property="og:image" content={article.image_url || ''} />
-        <meta property="og:type" content="article" />
+        <meta property="og:image" content={articleImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={article.title} />
+        <meta property="article:published_time" content={formatDateISO(article.created_at)} />
+        <meta property="article:modified_time" content={formatDateISO(article.updated_at || article.created_at)} />
+        <meta property="article:author" content="Healthy Life Hub" />
+        <meta property="article:section" content="Health" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={`https://healthylifehub.com${articleUrl}`} />
+        <meta name="twitter:title" content={article.title} />
+        <meta name="twitter:description" content={article.excerpt || ''} />
+        <meta name="twitter:image" content={articleImage} />
+        <meta name="twitter:label1" content="Reading time" />
+        <meta name="twitter:data1" content={getReadTime(article.content)} />
       </Helmet>
+      
+      {/* Structured Data */}
+      <ArticleSchema
+        title={article.title}
+        description={article.excerpt || ''}
+        image={articleImage}
+        url={articleUrl}
+        publishedTime={formatDateISO(article.created_at)}
+        modifiedTime={formatDateISO(article.updated_at || article.created_at)}
+        section="Health"
+      />
+      
+      <BreadcrumbSchema
+        items={[
+          { name: 'الرئيسية', url: '/' },
+          { name: 'المقالات', url: '/articles' },
+          { name: article.title, url: articleUrl },
+        ]}
+      />
+      
       <Layout>
         {/* Hero Image */}
         <section className="relative h-[50vh] min-h-[400px]">
           <img
-            src={article.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&h=600&fit=crop'}
+            src={articleImage}
             alt={article.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8" dir="rtl">
             <div className="container mx-auto">
-              <Link to="/articles" className="inline-flex items-center gap-2 text-primary hover:underline mb-4">
-                <ArrowRight className="w-4 h-4" />
-                العودة للمقالات
-              </Link>
+              <nav aria-label="Breadcrumb" className="mb-4">
+                <Link to="/articles" className="inline-flex items-center gap-2 text-primary hover:underline">
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  العودة للمقالات
+                </Link>
+              </nav>
               <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground max-w-4xl">
                 {article.title}
               </h1>
@@ -159,25 +216,25 @@ const ArticleDetail = () => {
         </section>
 
         {/* Article Content */}
-        <section className="py-12" dir="rtl">
+        <article className="py-12" dir="rtl">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-6 mb-8 text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(article.created_at)}</span>
+                  <Calendar className="w-4 h-4" aria-hidden="true" />
+                  <time dateTime={formatDateISO(article.created_at)}>{formatDate(article.created_at)}</time>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4" aria-hidden="true" />
                   <span>{getReadTime(article.content)}</span>
                 </div>
               </div>
 
               {/* Share Buttons */}
               <div className="flex items-center gap-3 mb-8">
-                <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="w-4 h-4 ml-2" />
+                <Button variant="outline" size="sm" onClick={handleShare} aria-label="مشاركة المقال">
+                  <Share2 className="w-4 h-4 ml-2" aria-hidden="true" />
                   مشاركة
                 </Button>
               </div>
@@ -192,7 +249,7 @@ const ArticleDetail = () => {
               )}
 
               {/* Article Body */}
-              <article 
+              <div 
                 className="prose prose-lg dark:prose-invert max-w-none
                   prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground
                   prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
@@ -207,13 +264,13 @@ const ArticleDetail = () => {
               />
             </div>
           </div>
-        </section>
+        </article>
 
         {/* Related Articles */}
         {relatedArticles.length > 0 && (
-          <section className="py-16 bg-muted/30" dir="rtl">
+          <aside className="py-16 bg-muted/30" dir="rtl" aria-labelledby="related-articles-heading">
             <div className="container mx-auto px-4">
-              <h2 className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
+              <h2 id="related-articles-heading" className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
                 مقالات <span className="text-primary">ذات صلة</span>
               </h2>
               <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -225,6 +282,7 @@ const ArticleDetail = () => {
                           src={related.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop'}
                           alt={related.title}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                       <CardContent className="p-4">
@@ -240,7 +298,7 @@ const ArticleDetail = () => {
                 ))}
               </div>
             </div>
-          </section>
+          </aside>
         )}
       </Layout>
     </>

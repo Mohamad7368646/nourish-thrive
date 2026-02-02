@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import RecipeSchema from '@/components/seo/RecipeSchema';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 interface Recipe {
   id: string;
@@ -27,6 +29,7 @@ interface Recipe {
   ingredients: string[] | null;
   instructions: string[] | null;
   tags: string[] | null;
+  created_at?: string;
 }
 
 interface RelatedRecipe {
@@ -137,6 +140,10 @@ const RecipeDetail = () => {
   if (!recipe) {
     return (
       <Layout>
+        <Helmet>
+          <title>Recipe Not Found | Healthy Life Hub</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <div className="min-h-screen flex flex-col items-center justify-center">
           <h1 className="text-2xl font-serif font-bold mb-4">Recipe not found</h1>
           <Link to="/recipes">
@@ -147,31 +154,83 @@ const RecipeDetail = () => {
     );
   }
 
+  const recipeImage = recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=630&fit=crop';
+  const recipeUrl = `/recipes/${recipe.slug}`;
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+
   return (
     <>
       <Helmet>
         <title>{recipe.title} | Healthy Life Hub Recipes</title>
-        <meta name="description" content={recipe.description || ''} />
+        <meta name="title" content={`${recipe.title} | Healthy Life Hub Recipes`} />
+        <meta name="description" content={recipe.description || `Healthy ${recipe.title} recipe with ${recipe.calories || 0} calories per serving. Ready in ${totalTime} minutes.`} />
+        <meta name="keywords" content={`${recipe.title}, healthy recipe, ${recipe.tags?.join(', ') || 'nutritious meal'}, low calorie, healthy cooking`} />
+        <link rel="canonical" href={`https://healthylifehub.com${recipeUrl}`} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://healthylifehub.com${recipeUrl}`} />
         <meta property="og:title" content={recipe.title} />
         <meta property="og:description" content={recipe.description || ''} />
-        <meta property="og:image" content={recipe.image_url || ''} />
-        <meta property="og:type" content="article" />
+        <meta property="og:image" content={recipeImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={recipe.title} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={`https://healthylifehub.com${recipeUrl}`} />
+        <meta name="twitter:title" content={recipe.title} />
+        <meta name="twitter:description" content={recipe.description || ''} />
+        <meta name="twitter:image" content={recipeImage} />
+        <meta name="twitter:label1" content="Time" />
+        <meta name="twitter:data1" content={`${totalTime} min`} />
+        <meta name="twitter:label2" content="Calories" />
+        <meta name="twitter:data2" content={`${recipe.calories || 0} cal`} />
       </Helmet>
+      
+      {/* Structured Data */}
+      <RecipeSchema
+        title={recipe.title}
+        description={recipe.description || ''}
+        image={recipeImage}
+        url={recipeUrl}
+        prepTime={recipe.prep_time || 0}
+        cookTime={recipe.cook_time || 0}
+        servings={recipe.servings || 4}
+        calories={recipe.calories || undefined}
+        ingredients={recipe.ingredients || []}
+        instructions={recipe.instructions || []}
+        keywords={recipe.tags || []}
+        difficulty={getDifficultyLabel(recipe.difficulty)}
+        publishedTime={recipe.created_at}
+      />
+      
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Recipes', url: '/recipes' },
+          { name: recipe.title, url: recipeUrl },
+        ]}
+      />
+      
       <Layout>
         {/* Hero Section */}
         <section className="relative h-[50vh] min-h-[400px]">
           <img
-            src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=600&fit=crop'}
+            src={recipeImage}
             alt={recipe.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container mx-auto">
-              <Link to="/recipes" className="inline-flex items-center gap-2 text-primary hover:underline mb-4">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Recipes
-              </Link>
+              <nav aria-label="Breadcrumb" className="mb-4">
+                <Link to="/recipes" className="inline-flex items-center gap-2 text-primary hover:underline">
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                  Back to Recipes
+                </Link>
+              </nav>
               <div className="flex flex-wrap gap-2 mb-4">
                 <Badge>{getDifficultyLabel(recipe.difficulty)}</Badge>
                 {recipe.tags?.slice(0, 2).map((tag) => (
@@ -186,27 +245,27 @@ const RecipeDetail = () => {
         </section>
 
         {/* Recipe Content */}
-        <section className="py-12">
+        <article className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-6 mb-8">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="w-5 h-5 text-primary" />
+                  <Clock className="w-5 h-5 text-primary" aria-hidden="true" />
                   <div>
                     <p className="text-xs uppercase">Prep Time</p>
                     <p className="font-semibold text-foreground">{recipe.prep_time || 0} min</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <ChefHat className="w-5 h-5 text-primary" />
+                  <ChefHat className="w-5 h-5 text-primary" aria-hidden="true" />
                   <div>
                     <p className="text-xs uppercase">Cook Time</p>
                     <p className="font-semibold text-foreground">{recipe.cook_time || 0} min</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5 text-primary" />
+                  <Users className="w-5 h-5 text-primary" aria-hidden="true" />
                   <div>
                     <p className="text-xs uppercase">Servings</p>
                     <p className="font-semibold text-foreground">{recipe.servings || 4} servings</p>
@@ -216,8 +275,8 @@ const RecipeDetail = () => {
 
               {/* Share Button */}
               <div className="flex items-center gap-3 mb-8">
-                <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="w-4 h-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share recipe">
+                  <Share2 className="w-4 h-4 mr-2" aria-hidden="true" />
                   Share
                 </Button>
               </div>
@@ -230,7 +289,7 @@ const RecipeDetail = () => {
               <Card className="mb-10">
                 <CardContent className="p-6">
                   <h2 className="font-serif text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                    <Flame className="w-5 h-5 text-primary" />
+                    <Flame className="w-5 h-5 text-primary" aria-hidden="true" />
                     Nutrition Facts (per serving)
                   </h2>
                   <div className="grid grid-cols-5 gap-4 text-center">
@@ -269,7 +328,7 @@ const RecipeDetail = () => {
                       <ul className="space-y-3">
                         {recipe.ingredients?.map((ingredient, index) => (
                           <li key={index} className="flex items-start gap-3">
-                            <input type="checkbox" className="mt-1.5 rounded border-border" />
+                            <input type="checkbox" className="mt-1.5 rounded border-border" aria-label={`Mark ${ingredient} as prepared`} />
                             <span className="text-muted-foreground">{ingredient}</span>
                           </li>
                         ))}
@@ -283,10 +342,10 @@ const RecipeDetail = () => {
                   <h2 className="font-serif text-2xl font-bold text-foreground mb-6">
                     Instructions
                   </h2>
-                  <div className="space-y-6">
+                  <ol className="space-y-6">
                     {recipe.instructions?.map((instruction, index) => (
-                      <div key={index} className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold flex-shrink-0">
+                      <li key={index} className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold flex-shrink-0" aria-hidden="true">
                           {index + 1}
                         </div>
                         <div>
@@ -294,32 +353,32 @@ const RecipeDetail = () => {
                             {instruction}
                           </p>
                         </div>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ol>
                 </div>
               </div>
 
               {/* Tags */}
               {recipe.tags && recipe.tags.length > 0 && (
-                <div className="mt-12 pt-8 border-t border-border">
+                <footer className="mt-12 pt-8 border-t border-border">
                   <h3 className="font-serif font-semibold text-foreground mb-4">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {recipe.tags.map((tag) => (
                       <Badge key={tag} variant="secondary">{tag}</Badge>
                     ))}
                   </div>
-                </div>
+                </footer>
               )}
             </div>
           </div>
-        </section>
+        </article>
 
         {/* Related Recipes */}
         {relatedRecipes.length > 0 && (
-          <section className="py-16 bg-muted/30">
+          <aside className="py-16 bg-muted/30" aria-labelledby="related-recipes-heading">
             <div className="container mx-auto px-4">
-              <h2 className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
+              <h2 id="related-recipes-heading" className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
                 You Might Also <span className="text-primary">Like</span>
               </h2>
               <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -331,6 +390,7 @@ const RecipeDetail = () => {
                           src={related.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=250&fit=crop'}
                           alt={related.title}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                       <CardContent className="p-4">
@@ -339,11 +399,11 @@ const RecipeDetail = () => {
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Flame className="w-4 h-4" />
+                            <Flame className="w-4 h-4" aria-hidden="true" />
                             {related.calories || 0} cal
                           </span>
                           <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
+                            <Clock className="w-4 h-4" aria-hidden="true" />
                             {formatTime(related.prep_time, related.cook_time)}
                           </span>
                         </div>
@@ -353,7 +413,7 @@ const RecipeDetail = () => {
                 ))}
               </div>
             </div>
-          </section>
+          </aside>
         )}
       </Layout>
     </>

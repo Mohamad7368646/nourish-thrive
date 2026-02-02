@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/layout/Layout';
 import { Heart, Target, Users, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 const About = () => {
   const values = [
@@ -27,12 +28,50 @@ const About = () => {
     }
   ];
 
+  // About page schema
+  const aboutSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About Healthy Life Hub',
+    description: 'Learn about Healthy Life Hub\'s mission to provide evidence-based health and nutrition information.',
+    url: 'https://healthylifehub.com/about',
+    mainEntity: {
+      '@type': 'Organization',
+      name: 'Healthy Life Hub',
+      description: 'Your trusted source for evidence-based nutrition advice, healthy recipes, and wellness tools.',
+      url: 'https://healthylifehub.com',
+      foundingDate: '2024',
+      areaServed: 'Worldwide',
+      knowsAbout: ['Nutrition', 'Health', 'Wellness', 'Fitness', 'Healthy Recipes'],
+    },
+  };
+
   return (
     <>
       <Helmet>
-        <title>About Us | Healthy Life Hub - Your Trusted Health Resource</title>
+        <title>About Us | Healthy Life Hub - من نحن</title>
+        <meta name="title" content="About Us | Healthy Life Hub - من نحن" />
         <meta name="description" content="Learn about Healthy Life Hub's mission to provide evidence-based health and nutrition information. Discover our values and commitment to your wellness journey." />
+        <meta name="keywords" content="about healthy life hub, health website, nutrition experts, wellness platform, health information" />
+        <link rel="canonical" href="https://healthylifehub.com/about" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://healthylifehub.com/about" />
+        <meta property="og:title" content="About Us | Healthy Life Hub" />
+        <meta property="og:description" content="Learn about our mission to provide evidence-based health and nutrition information." />
+        <meta property="og:image" content="https://healthylifehub.com/og-about.png" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(aboutSchema)}</script>
       </Helmet>
+      
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'About', url: '/about' },
+        ]}
+      />
       <Layout>
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
