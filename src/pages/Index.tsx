@@ -6,7 +6,7 @@ import FeaturedArticles from '@/components/home/FeaturedArticles';
 import FeaturedRecipes from '@/components/home/FeaturedRecipes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-
+import Layout from '@/components/layout/Layout';
 
 // Tools data
 const tools = [
@@ -42,13 +42,74 @@ const stats = [
 ];
 
 const Index = () => {
+  // Home page structured data
+  const homeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Healthy Life Hub - Your Complete Guide to Nutrition & Wellness',
+    description: 'Discover evidence-based nutrition advice, healthy recipes, and wellness tools. Start your journey to a healthier lifestyle.',
+    url: 'https://healthylifehub.com',
+    mainEntity: {
+      '@type': 'HealthTopicContent',
+      about: {
+        '@type': 'MedicalCondition',
+        name: 'Nutrition and Wellness',
+      },
+    },
+    specialty: ['Nutrition', 'Healthy Eating', 'Fitness', 'Wellness'],
+  };
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Healthy Life Hub',
+    description: 'A comprehensive collection of health articles, nutritious recipes, and wellness tools',
+    url: 'https://healthylifehub.com',
+    hasPart: [
+      {
+        '@type': 'WebPageElement',
+        name: 'Health Articles',
+        url: 'https://healthylifehub.com/articles',
+      },
+      {
+        '@type': 'WebPageElement',
+        name: 'Healthy Recipes',
+        url: 'https://healthylifehub.com/recipes',
+      },
+      {
+        '@type': 'WebPageElement',
+        name: 'Health Tools',
+        url: 'https://healthylifehub.com/tools',
+      },
+    ],
+  };
+
   return (
-    <>
+    <Layout>
       <Helmet>
-        <title>HealthyLife Hub - Your Complete Guide to Nutrition & Wellness</title>
-        <meta name="description" content="Discover evidence-based nutrition advice, healthy recipes, and wellness tools. Start your journey to a healthier lifestyle with expert guidance." />
-        <meta name="keywords" content="nutrition, healthy eating, recipes, wellness, diet, weight loss, fitness, health tips" />
+        <title>Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية</title>
+        <meta name="title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
+        <meta name="description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك. ابدأ رحلتك نحو حياة صحية أفضل." />
+        <meta name="keywords" content="تغذية صحية, وصفات صحية, حمية غذائية, إنقاص الوزن, لياقة بدنية, صحة, healthy recipes, nutrition, diet, wellness" />
         <link rel="canonical" href="https://healthylifehub.com" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://healthylifehub.com" />
+        <meta property="og:title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
+        <meta property="og:description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك." />
+        <meta property="og:image" content="https://healthylifehub.com/og-image.png" />
+        <meta property="og:locale" content="ar_SA" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
+        <meta name="twitter:description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك." />
+        <meta name="twitter:image" content="https://healthylifehub.com/og-image.png" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(homeSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
 
       {/* Hero Section */}
@@ -94,15 +155,17 @@ const Index = () => {
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float">
                       <img 
                         src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&q=80" 
-                        alt="Healthy salad bowl"
+                        alt="وعاء سلطة صحية متنوعة"
                         className="w-full h-48 object-cover"
+                        loading="lazy"
                       />
                     </div>
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '1s' }}>
                       <img 
                         src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80" 
-                        alt="Yoga and wellness"
+                        alt="تمارين اليوغا والعافية"
                         className="w-full h-32 object-cover"
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -110,15 +173,17 @@ const Index = () => {
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
                       <img 
                         src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80" 
-                        alt="Fresh fruits and vegetables"
+                        alt="فواكه وخضروات طازجة"
                         className="w-full h-32 object-cover"
+                        loading="lazy"
                       />
                     </div>
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '1.5s' }}>
                       <img 
                         src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80" 
-                        alt="Nutritious meal prep"
+                        alt="وجبات صحية محضرة مسبقاً"
                         className="w-full h-48 object-cover"
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -152,7 +217,7 @@ const Index = () => {
                 className="text-center"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <stat.icon className="w-8 h-8 mx-auto mb-2 opacity-80" />
+                <stat.icon className="w-8 h-8 mx-auto mb-2 opacity-80" aria-hidden="true" />
                 <p className="text-3xl md:text-4xl font-bold">{stat.value}</p>
                 <p className="text-sm opacity-80">{stat.label}</p>
               </div>
@@ -167,14 +232,14 @@ const Index = () => {
       {/* Tools Section */}
       <section className="section-padding bg-muted/50">
         <div className="container-custom">
-          <div className="text-center mb-12">
+          <header className="text-center mb-12">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
               Health Calculators & Tools
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Free interactive tools to help you track and improve your health metrics
             </p>
-          </div>
+          </header>
 
           <div className="grid md:grid-cols-3 gap-6">
             {tools.map((tool, index) => (
@@ -187,7 +252,7 @@ const Index = () => {
                 <Card className="h-full card-hover border-border group-hover:border-primary/50">
                   <CardContent className="p-6 text-center">
                     <div className={`w-16 h-16 rounded-2xl ${tool.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                      <tool.icon className="w-8 h-8" />
+                      <tool.icon className="w-8 h-8" aria-hidden="true" />
                     </div>
                     <h3 className="font-serif text-lg font-semibold text-foreground mb-2">
                       {tool.name}
@@ -204,7 +269,7 @@ const Index = () => {
           <div className="mt-8 text-center">
             <Button asChild>
               <Link to="/tools" className="gap-2">
-                Explore All Tools <ArrowRight className="w-4 h-4" />
+                Explore All Tools <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -221,10 +286,10 @@ const Index = () => {
       <section className="section-padding bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10">
-            <Leaf className="w-32 h-32 animate-float" />
+            <Leaf className="w-32 h-32 animate-float" aria-hidden="true" />
           </div>
           <div className="absolute bottom-10 right-10">
-            <Dumbbell className="w-24 h-24 animate-float" style={{ animationDelay: '1s' }} />
+            <Dumbbell className="w-24 h-24 animate-float" style={{ animationDelay: '1s' }} aria-hidden="true" />
           </div>
         </div>
         
@@ -236,19 +301,22 @@ const Index = () => {
             Join thousands of readers who receive weekly health tips, recipes, 
             and expert nutrition advice directly in their inbox.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+          <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto" aria-label="Newsletter subscription">
+            <label htmlFor="email-subscribe" className="sr-only">Email address</label>
             <input
+              id="email-subscribe"
               type="email"
               placeholder="Enter your email"
               className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+              required
             />
-            <Button className="bg-white text-primary hover:bg-white/90 font-semibold">
+            <Button type="submit" className="bg-white text-primary hover:bg-white/90 font-semibold">
               Subscribe
             </Button>
-          </div>
+          </form>
         </div>
       </section>
-    </>
+    </Layout>
   );
 };
 

@@ -1,14 +1,13 @@
 import { Helmet } from 'react-helmet-async';
 import { useState, useEffect } from 'react';
-import { Search, Filter, Clock, ChevronRight } from 'lucide-react';
+import { Search, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/layout/Layout';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 interface Article {
   id: string;
@@ -61,13 +60,56 @@ const Articles = () => {
     return `${minutes} دقائق قراءة`;
   };
 
+  // Collection page schema
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'المقالات الصحية | Healthy Life Hub',
+    description: 'تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية',
+    url: 'https://healthylifehub.com/articles',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: articles.length,
+      itemListElement: articles.slice(0, 10).map((article, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `https://healthylifehub.com/articles/${article.slug}`,
+        name: article.title,
+      })),
+    },
+  };
+
   return (
     <Layout>
       <Helmet>
-        <title>المقالات الصحية | Healthy Life Hub</title>
-        <meta name="description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية." />
-        <meta name="keywords" content="مقالات صحية, نصائح تغذية, حياة صحية, صحة, تغذية" />
+        <title>المقالات الصحية | Healthy Life Hub - دليلك للحياة الصحية</title>
+        <meta name="title" content="المقالات الصحية | Healthy Life Hub - دليلك للحياة الصحية" />
+        <meta name="description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية. نصائح طبية، حميات غذائية، ولياقة بدنية." />
+        <meta name="keywords" content="مقالات صحية, نصائح تغذية, حياة صحية, صحة, تغذية, حمية غذائية, لياقة بدنية, نصائح طبية" />
+        <link rel="canonical" href="https://healthylifehub.com/articles" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://healthylifehub.com/articles" />
+        <meta property="og:title" content="المقالات الصحية | Healthy Life Hub" />
+        <meta property="og:description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية." />
+        <meta property="og:image" content="https://healthylifehub.com/og-articles.png" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="المقالات الصحية | Healthy Life Hub" />
+        <meta name="twitter:description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية." />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
+      
+      <BreadcrumbSchema
+        items={[
+          { name: 'الرئيسية', url: '/' },
+          { name: 'المقالات', url: '/articles' },
+        ]}
+      />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-accent/50 to-background py-12 md:py-16" dir="rtl">

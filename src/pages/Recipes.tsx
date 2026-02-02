@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Flame, ChefHat } from 'lucide-react';
+import { Search, Clock, Flame, ChefHat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 interface Recipe {
   id: string;
@@ -81,13 +82,56 @@ const Recipes = () => {
     }
   };
 
+  // Collection page schema
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Healthy Recipes | Healthy Life Hub',
+    description: 'Discover delicious and nutritious recipes for every meal with full nutritional information.',
+    url: 'https://healthylifehub.com/recipes',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: recipes.length,
+      itemListElement: recipes.slice(0, 10).map((recipe, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `https://healthylifehub.com/recipes/${recipe.slug}`,
+        name: recipe.title,
+      })),
+    },
+  };
+
   return (
     <Layout>
       <Helmet>
-        <title>Healthy Recipes | HealthyLife Hub</title>
-        <meta name="description" content="Discover delicious and nutritious recipes for every meal. From quick breakfasts to healthy dinners, find recipes with full nutritional information." />
-        <meta name="keywords" content="healthy recipes, nutritious meals, diet recipes, low calorie, high protein, vegan recipes" />
+        <title>Healthy Recipes | Healthy Life Hub - وصفات صحية</title>
+        <meta name="title" content="Healthy Recipes | Healthy Life Hub - وصفات صحية" />
+        <meta name="description" content="Discover delicious and nutritious recipes for every meal. From quick breakfasts to healthy dinners, find recipes with full nutritional information. Vegan, Keto, Low-Carb options available." />
+        <meta name="keywords" content="healthy recipes, nutritious meals, diet recipes, low calorie, high protein, vegan recipes, keto recipes, meal prep, وصفات صحية" />
+        <link rel="canonical" href="https://healthylifehub.com/recipes" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://healthylifehub.com/recipes" />
+        <meta property="og:title" content="Healthy Recipes | Healthy Life Hub" />
+        <meta property="og:description" content="Discover delicious and nutritious recipes for every meal with full nutritional information." />
+        <meta property="og:image" content="https://healthylifehub.com/og-recipes.png" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Healthy Recipes | Healthy Life Hub" />
+        <meta name="twitter:description" content="Discover delicious and nutritious recipes for every meal." />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
+      
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Recipes', url: '/recipes' },
+        ]}
+      />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-accent/50 to-background py-12 md:py-16">
