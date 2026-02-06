@@ -2,14 +2,14 @@ import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/layout/Layout';
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Clock, Users, ChefHat, ArrowLeft, Share2, Flame, Loader2 } from 'lucide-react';
+import { Clock, Users, ChefHat, ArrowLeft, Flame, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import RecipeSchema from '@/components/seo/RecipeSchema';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import { ShareButtons } from '@/components/share/ShareButtons';
 
 interface Recipe {
   id: string;
@@ -47,7 +47,6 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [relatedRecipes, setRelatedRecipes] = useState<RelatedRecipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -108,22 +107,6 @@ const RecipeDetail = () => {
       case 'medium': return 'Medium';
       case 'hard': return 'Hard';
       default: return 'Easy';
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: recipe?.title,
-          url: window.location.href,
-        });
-      } catch (err) {
-        // User cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast({ title: 'Link copied!' });
     }
   };
 
@@ -274,12 +257,11 @@ const RecipeDetail = () => {
               </div>
 
               {/* Share Button */}
-              <div className="flex items-center gap-3 mb-8">
-                <Button variant="outline" size="sm" onClick={handleShare} aria-label="Share recipe">
-                  <Share2 className="w-4 h-4 mr-2" aria-hidden="true" />
-                  Share
-                </Button>
-              </div>
+              <ShareButtons 
+                title={recipe.title} 
+                description={recipe.description || ''} 
+                className="mb-8"
+              />
 
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                 {recipe.description}
