@@ -2,13 +2,13 @@ import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/layout/Layout';
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, ArrowRight, Share2, Loader2 } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import ArticleSchema from '@/components/seo/ArticleSchema';
+import { ShareButtons } from '@/components/share/ShareButtons';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 
 interface Article {
@@ -36,7 +36,6 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState<Article | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -91,22 +90,6 @@ const ArticleDetail = () => {
     const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
     const minutes = Math.max(3, Math.ceil(words / 200));
     return `${minutes} دقائق قراءة`;
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: article?.title,
-          url: window.location.href,
-        });
-      } catch (err) {
-        // User cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast({ title: 'تم نسخ الرابط' });
-    }
   };
 
   if (loading) {
@@ -232,12 +215,11 @@ const ArticleDetail = () => {
               </div>
 
               {/* Share Buttons */}
-              <div className="flex items-center gap-3 mb-8">
-                <Button variant="outline" size="sm" onClick={handleShare} aria-label="مشاركة المقال">
-                  <Share2 className="w-4 h-4 ml-2" aria-hidden="true" />
-                  مشاركة
-                </Button>
-              </div>
+              <ShareButtons 
+                title={article.title} 
+                description={article.excerpt || ''} 
+                className="mb-8"
+              />
 
               <Separator className="mb-8" />
 
