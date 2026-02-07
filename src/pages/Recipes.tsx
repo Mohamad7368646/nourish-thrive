@@ -56,9 +56,10 @@ const Recipes = () => {
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const normalize = (s: string) => s.toLowerCase().replace(/[-\s]/g, '');
     const matchesDiet = selectedDiet === 'All Diets' || 
       (recipe.tags && recipe.tags.some(tag => 
-        tag.toLowerCase().includes(selectedDiet.toLowerCase().replace('-', ''))
+        normalize(tag).includes(normalize(selectedDiet))
       ));
     return matchesSearch && matchesDiet;
   });
