@@ -1,29 +1,35 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Search } from 'lucide-react';
+import { Menu, X, Sun, Moon, Search, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
+import { useLanguage } from '@/i18n/LanguageContext';
 import logo from '@/assets/logo.png';
 import SearchDialog from '@/components/search/SearchDialog';
-
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'Articles', href: '/articles' },
-  { name: 'Recipes', href: '/recipes' },
-  { name: 'Tools', href: '/tools' },
-  { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' },
-];
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
+
+  const navigation = [
+    { name: t.nav.home, href: '/' },
+    { name: t.nav.articles, href: '/articles' },
+    { name: t.nav.recipes, href: '/recipes' },
+    { name: t.nav.tools, href: '/tools' },
+    { name: t.nav.about, href: '/about' },
+    { name: t.nav.contact, href: '/contact' },
+  ];
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
   };
 
   return (
@@ -42,7 +48,7 @@ const Header = () => {
                 Healthy<span className="text-primary">Life</span>
               </span>
               <span className="hidden md:block text-xs text-muted-foreground -mt-1">
-                Your Wellness Journey
+                {t.footer.wellnessJourney}
               </span>
             </div>
           </Link>
@@ -51,7 +57,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center gap-1">
             {navigation.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   isActive(item.href)
@@ -65,7 +71,7 @@ const Header = () => {
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Search Button */}
             <Button
               variant="ghost"
@@ -74,6 +80,18 @@ const Header = () => {
               className="rounded-lg"
             >
               <Search className="w-5 h-5" />
+            </Button>
+
+            {/* Language Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              className="rounded-lg"
+              title={language === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
+            >
+              <Globe className="w-5 h-5" />
+              <span className="sr-only">{language === 'en' ? 'العربية' : 'English'}</span>
             </Button>
 
             {/* Theme Toggle */}
@@ -112,7 +130,7 @@ const Header = () => {
             <div className="flex flex-col gap-1">
               {navigation.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg text-base font-medium transition-all duration-300 ${
@@ -124,6 +142,15 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
+              
+              {/* Mobile Language Toggle */}
+              <button
+                onClick={toggleLanguage}
+                className="px-4 py-3 rounded-lg text-base font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all duration-300 flex items-center gap-2"
+              >
+                <Globe className="w-5 h-5" />
+                {language === 'en' ? 'العربية' : 'English'}
+              </button>
             </div>
           </div>
         )}

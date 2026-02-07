@@ -7,41 +7,42 @@ import FeaturedRecipes from '@/components/home/FeaturedRecipes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
-
-// Tools data
-const tools = [
-  {
-    name: 'BMI Calculator',
-    description: 'Calculate your Body Mass Index',
-    icon: Calculator,
-    href: '/tools#bmi',
-    color: 'bg-health-green-light text-health-green',
-  },
-  {
-    name: 'Calorie Calculator',
-    description: 'Find your daily calorie needs',
-    icon: TrendingUp,
-    href: '/tools#calories',
-    color: 'bg-health-orange-light text-health-orange',
-  },
-  {
-    name: 'Water Intake',
-    description: 'Calculate daily water requirements',
-    icon: Leaf,
-    href: '/tools#water',
-    color: 'bg-health-blue-light text-health-blue',
-  },
-];
-
-// Stats data
-const stats = [
-  { value: '500+', label: 'Articles', icon: BookOpen },
-  { value: '300+', label: 'Recipes', icon: Utensils },
-  { value: '50K+', label: 'Readers', icon: Users },
-  { value: '98%', label: 'Satisfaction', icon: Heart },
-];
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const Index = () => {
+  const { t, language } = useLanguage();
+
+  const tools = [
+    {
+      name: t.home.bmiCalc,
+      description: t.home.bmiDesc,
+      icon: Calculator,
+      href: '/tools#bmi',
+      color: 'bg-health-green-light text-health-green',
+    },
+    {
+      name: t.home.calorieCalc,
+      description: t.home.calorieDesc,
+      icon: TrendingUp,
+      href: '/tools#calories',
+      color: 'bg-health-orange-light text-health-orange',
+    },
+    {
+      name: t.home.waterIntake,
+      description: t.home.waterDesc,
+      icon: Leaf,
+      href: '/tools#water',
+      color: 'bg-health-blue-light text-health-blue',
+    },
+  ];
+
+  const stats = [
+    { value: '500+', label: t.home.statsArticles, icon: BookOpen },
+    { value: '300+', label: t.home.statsRecipes, icon: Utensils },
+    { value: '50K+', label: t.home.statsReaders, icon: Users },
+    { value: '98%', label: t.home.statsSatisfaction, icon: Heart },
+  ];
+
   // Home page structured data
   const homeSchema = {
     '@context': 'https://schema.org',
@@ -66,48 +67,25 @@ const Index = () => {
     description: 'A comprehensive collection of health articles, nutritious recipes, and wellness tools',
     url: 'https://healthylifehub.com',
     hasPart: [
-      {
-        '@type': 'WebPageElement',
-        name: 'Health Articles',
-        url: 'https://healthylifehub.com/articles',
-      },
-      {
-        '@type': 'WebPageElement',
-        name: 'Healthy Recipes',
-        url: 'https://healthylifehub.com/recipes',
-      },
-      {
-        '@type': 'WebPageElement',
-        name: 'Health Tools',
-        url: 'https://healthylifehub.com/tools',
-      },
+      { '@type': 'WebPageElement', name: 'Health Articles', url: 'https://healthylifehub.com/articles' },
+      { '@type': 'WebPageElement', name: 'Healthy Recipes', url: 'https://healthylifehub.com/recipes' },
+      { '@type': 'WebPageElement', name: 'Health Tools', url: 'https://healthylifehub.com/tools' },
     ],
   };
 
   return (
     <Layout>
       <Helmet>
-        <title>Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية</title>
-        <meta name="title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
-        <meta name="description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك. ابدأ رحلتك نحو حياة صحية أفضل." />
-        <meta name="keywords" content="تغذية صحية, وصفات صحية, حمية غذائية, إنقاص الوزن, لياقة بدنية, صحة, healthy recipes, nutrition, diet, wellness" />
+        <title>Healthy Life Hub | {language === 'ar' ? 'دليلك الشامل للتغذية والحياة الصحية' : 'Your Complete Guide to Nutrition & Wellness'}</title>
+        <meta name="description" content={t.home.subtitle} />
         <link rel="canonical" href="https://healthylifehub.com" />
-        
-        {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://healthylifehub.com" />
-        <meta property="og:title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
-        <meta property="og:description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك." />
+        <meta property="og:title" content="Healthy Life Hub" />
+        <meta property="og:description" content={t.home.subtitle} />
         <meta property="og:image" content="https://healthylifehub.com/og-image.png" />
-        <meta property="og:locale" content="ar_SA" />
-        
-        {/* Twitter */}
+        <meta property="og:locale" content={language === 'ar' ? 'ar_SA' : 'en_US'} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Healthy Life Hub | دليلك الشامل للتغذية والحياة الصحية" />
-        <meta name="twitter:description" content="اكتشف نصائح تغذوية مبنية على الأدلة العلمية، وصفات صحية لذيذة، وأدوات لتحسين صحتك." />
-        <meta name="twitter:image" content="https://healthylifehub.com/og-image.png" />
-        
-        {/* Structured Data */}
         <script type="application/ld+json">{JSON.stringify(homeSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
@@ -122,28 +100,27 @@ const Index = () => {
               <div className="space-y-8 animate-fade-in">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
                   <Leaf className="w-4 h-4" />
-                  <span>Your Wellness Journey Starts Here</span>
+                  <span>{t.home.badge}</span>
                 </div>
                 
                 <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-                  Eat Well, Live Well,{' '}
-                  <span className="text-primary">Be Well</span>
+                  {t.home.title}{' '}
+                  <span className="text-primary">{t.home.titleHighlight}</span>
                 </h1>
                 
                 <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-                  Discover evidence-based nutrition advice, delicious healthy recipes, 
-                  and powerful wellness tools to transform your health journey.
+                  {t.home.subtitle}
                 </p>
                 
                 <div className="flex flex-wrap gap-4">
                   <Button asChild size="lg" className="gap-2 shadow-lg hover:shadow-xl transition-all">
                     <Link to="/articles">
-                      Explore Articles
-                      <ArrowRight className="w-4 h-4" />
+                      {t.home.exploreArticles}
+                      <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link to="/recipes">Browse Recipes</Link>
+                    <Link to="/recipes">{t.home.browseRecipes}</Link>
                   </Button>
                 </div>
               </div>
@@ -153,51 +130,30 @@ const Index = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-4">
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float">
-                      <img 
-                        src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&q=80" 
-                        alt="وعاء سلطة صحية متنوعة"
-                        className="w-full h-48 object-cover"
-                        loading="lazy"
-                      />
+                      <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&q=80" alt="Healthy salad bowl" className="w-full h-48 object-cover" loading="lazy" />
                     </div>
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '1s' }}>
-                      <img 
-                        src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80" 
-                        alt="تمارين اليوغا والعافية"
-                        className="w-full h-32 object-cover"
-                        loading="lazy"
-                      />
+                      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80" alt="Yoga and wellness" className="w-full h-32 object-cover" loading="lazy" />
                     </div>
                   </div>
                   <div className="space-y-4 pt-8">
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '0.5s' }}>
-                      <img 
-                        src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80" 
-                        alt="فواكه وخضروات طازجة"
-                        className="w-full h-32 object-cover"
-                        loading="lazy"
-                      />
+                      <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80" alt="Fresh fruits and vegetables" className="w-full h-32 object-cover" loading="lazy" />
                     </div>
                     <div className="rounded-2xl overflow-hidden shadow-lg animate-float" style={{ animationDelay: '1.5s' }}>
-                      <img 
-                        src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80" 
-                        alt="وجبات صحية محضرة مسبقاً"
-                        className="w-full h-48 object-cover"
-                        loading="lazy"
-                      />
+                      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80" alt="Healthy meal prep" className="w-full h-48 object-cover" loading="lazy" />
                     </div>
                   </div>
                 </div>
                 
-                {/* Floating Stats Card */}
-                <div className="absolute -bottom-4 -left-4 bg-card rounded-xl shadow-xl p-4 border border-border animate-scale-in">
+                <div className="absolute -bottom-4 -start-4 bg-card rounded-xl shadow-xl p-4 border border-border animate-scale-in">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Apple className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-foreground">1000+ Recipes</p>
-                      <p className="text-xs text-muted-foreground">Healthy & Delicious</p>
+                      <p className="font-bold text-foreground">{t.home.recipesCount}</p>
+                      <p className="text-xs text-muted-foreground">{t.home.recipesLabel}</p>
                     </div>
                   </div>
                 </div>
@@ -212,11 +168,7 @@ const Index = () => {
         <div className="container-custom">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div 
-                key={stat.label} 
-                className="text-center"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <div key={stat.label} className="text-center" style={{ animationDelay: `${index * 0.1}s` }}>
                 <stat.icon className="w-8 h-8 mx-auto mb-2 opacity-80" aria-hidden="true" />
                 <p className="text-3xl md:text-4xl font-bold">{stat.value}</p>
                 <p className="text-sm opacity-80">{stat.label}</p>
@@ -226,7 +178,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Articles Section */}
       <FeaturedArticles />
 
       {/* Tools Section */}
@@ -234,32 +185,23 @@ const Index = () => {
         <div className="container-custom">
           <header className="text-center mb-12">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Health Calculators & Tools
+              {t.home.toolsTitle}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Free interactive tools to help you track and improve your health metrics
+              {t.home.toolsSubtitle}
             </p>
           </header>
 
           <div className="grid md:grid-cols-3 gap-6">
             {tools.map((tool, index) => (
-              <Link
-                key={tool.name}
-                to={tool.href}
-                className="group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <Link key={tool.name} to={tool.href} className="group" style={{ animationDelay: `${index * 0.1}s` }}>
                 <Card className="h-full card-hover border-border group-hover:border-primary/50">
                   <CardContent className="p-6 text-center">
                     <div className={`w-16 h-16 rounded-2xl ${tool.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                       <tool.icon className="w-8 h-8" aria-hidden="true" />
                     </div>
-                    <h3 className="font-serif text-lg font-semibold text-foreground mb-2">
-                      {tool.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {tool.description}
-                    </p>
+                    <h3 className="font-serif text-lg font-semibold text-foreground mb-2">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.description}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -269,49 +211,45 @@ const Index = () => {
           <div className="mt-8 text-center">
             <Button asChild>
               <Link to="/tools" className="gap-2">
-                Explore All Tools <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                {t.home.exploreAllTools} <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
               </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Seasonal Recipes Section */}
       <SeasonalRecipesSection />
-
-      {/* Featured Recipes Section */}
       <FeaturedRecipes />
 
       {/* CTA Section */}
       <section className="section-padding bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10">
+          <div className="absolute top-10 start-10">
             <Leaf className="w-32 h-32 animate-float" aria-hidden="true" />
           </div>
-          <div className="absolute bottom-10 right-10">
+          <div className="absolute bottom-10 end-10">
             <Dumbbell className="w-24 h-24 animate-float" style={{ animationDelay: '1s' }} aria-hidden="true" />
           </div>
         </div>
         
         <div className="container-custom relative text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Ready to Transform Your Health?
+            {t.home.ctaTitle}
           </h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            Join thousands of readers who receive weekly health tips, recipes, 
-            and expert nutrition advice directly in their inbox.
+            {t.home.ctaSubtitle}
           </p>
           <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto" aria-label="Newsletter subscription">
-            <label htmlFor="email-subscribe" className="sr-only">Email address</label>
+            <label htmlFor="email-subscribe" className="sr-only">Email</label>
             <input
               id="email-subscribe"
               type="email"
-              placeholder="Enter your email"
+              placeholder={t.common.enterEmail}
               className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
               required
             />
             <Button type="submit" className="bg-white text-primary hover:bg-white/90 font-semibold">
-              Subscribe
+              {t.common.subscribe}
             </Button>
           </form>
         </div>
