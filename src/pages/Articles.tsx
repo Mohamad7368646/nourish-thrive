@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/layout/Layout';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface Article {
   id: string;
@@ -23,6 +24,7 @@ const Articles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -47,7 +49,7 @@ const Articles = () => {
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    return new Date(dateString).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -57,15 +59,14 @@ const Articles = () => {
   const getReadTime = (excerpt: string | null) => {
     const words = excerpt ? excerpt.split(' ').length : 0;
     const minutes = Math.max(3, Math.ceil(words / 50));
-    return `${minutes} دقائق قراءة`;
+    return `${minutes} ${t.articlesPage.readTime}`;
   };
 
-  // Collection page schema
   const collectionSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'المقالات الصحية | Healthy Life Hub',
-    description: 'تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية',
+    name: 'Health Articles | Healthy Life Hub',
+    description: 'Browse our collection of evidence-based health and nutrition articles',
     url: 'https://healthylifehub.com/articles',
     mainEntity: {
       '@type': 'ItemList',
@@ -82,55 +83,42 @@ const Articles = () => {
   return (
     <Layout>
       <Helmet>
-        <title>المقالات الصحية | Healthy Life Hub - دليلك للحياة الصحية</title>
-        <meta name="title" content="المقالات الصحية | Healthy Life Hub - دليلك للحياة الصحية" />
-        <meta name="description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية. نصائح طبية، حميات غذائية، ولياقة بدنية." />
-        <meta name="keywords" content="مقالات صحية, نصائح تغذية, حياة صحية, صحة, تغذية, حمية غذائية, لياقة بدنية, نصائح طبية" />
+        <title>{t.articlesPage.title} | Healthy Life Hub</title>
+        <meta name="description" content={t.articlesPage.subtitle} />
         <link rel="canonical" href="https://healthylifehub.com/articles" />
-        
-        {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://healthylifehub.com/articles" />
-        <meta property="og:title" content="المقالات الصحية | Healthy Life Hub" />
-        <meta property="og:description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية." />
-        <meta property="og:image" content="https://healthylifehub.com/og-articles.png" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="المقالات الصحية | Healthy Life Hub" />
-        <meta name="twitter:description" content="تصفح مجموعتنا من المقالات الصحية والتغذوية المبنية على الأدلة العلمية." />
-        
-        {/* Structured Data */}
+        <meta property="og:title" content={`${t.articlesPage.title} | Healthy Life Hub`} />
+        <meta property="og:description" content={t.articlesPage.subtitle} />
         <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
       
       <BreadcrumbSchema
         items={[
-          { name: 'الرئيسية', url: '/' },
-          { name: 'المقالات', url: '/articles' },
+          { name: t.nav.home, url: '/' },
+          { name: t.nav.articles, url: '/articles' },
         ]}
       />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-accent/50 to-background py-12 md:py-16" dir="rtl">
+      <section className="bg-gradient-to-b from-accent/50 to-background py-12 md:py-16">
         <div className="container-custom">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-              المقالات الصحية
+              {t.articlesPage.title}
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              معلومات موثوقة لمساعدتك على اتخاذ قرارات صحية أفضل
+              {t.articlesPage.subtitle}
             </p>
             
-            {/* Search Bar */}
             <div className="relative max-w-xl mx-auto">
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="ابحث في المقالات..."
+                placeholder={t.articlesPage.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-12 pl-4 py-6 text-base rounded-xl border-border"
+                className="ps-12 pe-4 py-6 text-base rounded-xl border-border"
               />
             </div>
           </div>
@@ -138,7 +126,7 @@ const Articles = () => {
       </section>
 
       {/* Articles Grid */}
-      <section className="section-padding" dir="rtl">
+      <section className="section-padding">
         <div className="container-custom">
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -186,7 +174,7 @@ const Articles = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">لا توجد مقالات تطابق البحث.</p>
+              <p className="text-muted-foreground">{t.articlesPage.noArticles}</p>
             </div>
           )}
         </div>

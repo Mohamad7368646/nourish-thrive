@@ -1,22 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Leaf, Mail, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
-
-const footerLinks = {
-  explore: [
-    { name: 'Articles', href: '/articles' },
-    { name: 'Recipes', href: '/recipes' },
-    { name: 'Health Tools', href: '/tools' },
-  ],
-  company: [
-    { name: 'About Us', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ],
-  legal: [
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
-    { name: 'Cookie Policy', href: '/cookies' },
-  ],
-};
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const socialLinks = [
   { name: 'Facebook', icon: Facebook, href: '#' },
@@ -26,6 +10,25 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const { t } = useLanguage();
+
+  const footerLinks = {
+    explore: [
+      { name: t.nav.articles, href: '/articles' },
+      { name: t.nav.recipes, href: '/recipes' },
+      { name: t.footer.healthTools, href: '/tools' },
+    ],
+    company: [
+      { name: t.footer.aboutUs, href: '/about' },
+      { name: t.nav.contact, href: '/contact' },
+    ],
+    legal: [
+      { name: t.footer.privacyPolicy, href: '/privacy' },
+      { name: t.footer.termsOfService, href: '/terms' },
+      { name: t.footer.cookiePolicy, href: '/cookies' },
+    ],
+  };
+
   return (
     <footer className="bg-card border-t border-border">
       <div className="container-custom py-12 md:py-16">
@@ -41,32 +44,31 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm">
-              Your trusted source for evidence-based nutrition advice, healthy recipes, 
-              and wellness tools to help you live your healthiest life.
+              {t.footer.description}
             </p>
             
             {/* Newsletter */}
             <div className="flex gap-2 max-w-sm">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Mail className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="email"
-                  placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  placeholder={t.common.enterEmail}
+                  className="w-full ps-10 pe-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>
               <button className="px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
-                Subscribe
+                {t.common.subscribe}
               </button>
             </div>
           </div>
 
           {/* Explore Links */}
           <div>
-            <h3 className="font-serif font-semibold text-foreground mb-4">Explore</h3>
+            <h3 className="font-serif font-semibold text-foreground mb-4">{t.footer.explore}</h3>
             <ul className="space-y-3">
               {footerLinks.explore.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <Link
                     to={link.href}
                     className="text-muted-foreground text-sm hover:text-primary transition-colors"
@@ -80,10 +82,10 @@ const Footer = () => {
 
           {/* Company Links */}
           <div>
-            <h3 className="font-serif font-semibold text-foreground mb-4">Company</h3>
+            <h3 className="font-serif font-semibold text-foreground mb-4">{t.footer.company}</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <Link
                     to={link.href}
                     className="text-muted-foreground text-sm hover:text-primary transition-colors"
@@ -97,10 +99,10 @@ const Footer = () => {
 
           {/* Legal Links */}
           <div>
-            <h3 className="font-serif font-semibold text-foreground mb-4">Legal</h3>
+            <h3 className="font-serif font-semibold text-foreground mb-4">{t.footer.legal}</h3>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <Link
                     to={link.href}
                     className="text-muted-foreground text-sm hover:text-primary transition-colors"
@@ -116,7 +118,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} HealthyLife Hub. All rights reserved.
+            © {new Date().getFullYear()} HealthyLife Hub. {t.footer.allRightsReserved}
           </p>
           
           {/* Social Links */}

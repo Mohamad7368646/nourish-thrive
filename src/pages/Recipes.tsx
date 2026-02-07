@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface Recipe {
   id: string;
@@ -35,6 +36,7 @@ const Recipes = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDiet, setSelectedDiet] = useState('All Diets');
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -71,19 +73,23 @@ const Recipes = () => {
       const mins = total % 60;
       return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
     }
-    return `${total} min`;
+    return `${total} ${t.common.min}`;
   };
 
   const getDifficultyLabel = (difficulty: string | null) => {
     switch (difficulty) {
-      case 'easy': return 'Easy';
-      case 'medium': return 'Medium';
-      case 'hard': return 'Hard';
-      default: return 'Easy';
+      case 'easy': return t.common.easy;
+      case 'medium': return t.common.medium;
+      case 'hard': return t.common.hard;
+      default: return t.common.easy;
     }
   };
 
-  // Collection page schema
+  const getDietLabel = (diet: string) => {
+    if (diet === 'All Diets') return t.common.allDiets;
+    return diet;
+  };
+
   const collectionSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -105,32 +111,20 @@ const Recipes = () => {
   return (
     <Layout>
       <Helmet>
-        <title>Healthy Recipes | Healthy Life Hub - وصفات صحية</title>
-        <meta name="title" content="Healthy Recipes | Healthy Life Hub - وصفات صحية" />
-        <meta name="description" content="Discover delicious and nutritious recipes for every meal. From quick breakfasts to healthy dinners, find recipes with full nutritional information. Vegan, Keto, Low-Carb options available." />
-        <meta name="keywords" content="healthy recipes, nutritious meals, diet recipes, low calorie, high protein, vegan recipes, keto recipes, meal prep, وصفات صحية" />
+        <title>{t.recipesPage.title} | Healthy Life Hub</title>
+        <meta name="description" content={t.recipesPage.subtitle} />
         <link rel="canonical" href="https://healthylifehub.com/recipes" />
-        
-        {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://healthylifehub.com/recipes" />
-        <meta property="og:title" content="Healthy Recipes | Healthy Life Hub" />
-        <meta property="og:description" content="Discover delicious and nutritious recipes for every meal with full nutritional information." />
-        <meta property="og:image" content="https://healthylifehub.com/og-recipes.png" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Healthy Recipes | Healthy Life Hub" />
-        <meta name="twitter:description" content="Discover delicious and nutritious recipes for every meal." />
-        
-        {/* Structured Data */}
+        <meta property="og:title" content={`${t.recipesPage.title} | Healthy Life Hub`} />
+        <meta property="og:description" content={t.recipesPage.subtitle} />
         <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
       
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: '/' },
-          { name: 'Recipes', url: '/recipes' },
+          { name: t.nav.home, url: '/' },
+          { name: t.nav.recipes, url: '/recipes' },
         ]}
       />
 
@@ -139,21 +133,20 @@ const Recipes = () => {
         <div className="container-custom">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Healthy & Delicious Recipes
+              {t.recipesPage.title}
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Nutritious meals that taste amazing and support your wellness goals
+              {t.recipesPage.subtitle}
             </p>
             
-            {/* Search Bar */}
             <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search recipes..."
+                placeholder={t.recipesPage.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-base rounded-xl border-border"
+                className="ps-12 pe-4 py-6 text-base rounded-xl border-border"
               />
             </div>
           </div>
@@ -173,7 +166,7 @@ const Recipes = () => {
                 onClick={() => setSelectedDiet(diet)}
                 className="flex-shrink-0"
               >
-                {diet}
+                {getDietLabel(diet)}
               </Button>
             ))}
           </div>
@@ -185,7 +178,7 @@ const Recipes = () => {
         <div className="container-custom">
           <div className="flex items-center justify-between mb-8">
             <p className="text-muted-foreground">
-              Showing <span className="font-medium text-foreground">{filteredRecipes.length}</span> recipes
+              {t.common.showingCount} <span className="font-medium text-foreground">{filteredRecipes.length}</span> {t.common.recipes}
             </p>
           </div>
 
@@ -218,7 +211,7 @@ const Recipes = () => {
                         alt={recipe.title}
                         className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                      <div className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
+                      <div className="absolute top-3 end-3 bg-card/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
                         <Clock className="w-3 h-3 text-muted-foreground" />
                         <span className="text-xs font-medium text-foreground">
                           {formatTime(recipe.prep_time, recipe.cook_time)}
@@ -250,19 +243,19 @@ const Recipes = () => {
                         <div className="text-center">
                           <Flame className="w-4 h-4 mx-auto text-orange-500 mb-1" />
                           <p className="text-xs font-medium text-foreground">{recipe.calories || 0}</p>
-                          <p className="text-[10px] text-muted-foreground">cal</p>
+                          <p className="text-[10px] text-muted-foreground">{t.common.cal}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-xs font-medium text-foreground">{recipe.protein || 0}g</p>
-                          <p className="text-[10px] text-muted-foreground">protein</p>
+                          <p className="text-[10px] text-muted-foreground">{t.common.protein}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-xs font-medium text-foreground">{recipe.carbs || 0}g</p>
-                          <p className="text-[10px] text-muted-foreground">carbs</p>
+                          <p className="text-[10px] text-muted-foreground">{t.common.carbs}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-xs font-medium text-foreground">{recipe.fat || 0}g</p>
-                          <p className="text-[10px] text-muted-foreground">fat</p>
+                          <p className="text-[10px] text-muted-foreground">{t.common.fat}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -272,7 +265,7 @@ const Recipes = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No recipes found matching your criteria.</p>
+              <p className="text-muted-foreground">{t.recipesPage.noRecipes}</p>
             </div>
           )}
         </div>

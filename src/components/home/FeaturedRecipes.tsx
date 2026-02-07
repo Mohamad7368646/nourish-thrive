@@ -5,8 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const FeaturedRecipes = () => {
+  const { t } = useLanguage();
+
   const { data: recipes, isLoading } = useQuery({
     queryKey: ['featured-recipes'],
     queryFn: async () => {
@@ -16,7 +19,6 @@ const FeaturedRecipes = () => {
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(4);
-      
       if (error) throw error;
       return data;
     },
@@ -24,8 +26,8 @@ const FeaturedRecipes = () => {
 
   const formatTime = (prepTime: number | null, cookTime: number | null) => {
     const total = (prepTime || 0) + (cookTime || 0);
-    if (total === 0) return '15 min';
-    return `${total} min`;
+    if (total === 0) return `15 ${t.common.min}`;
+    return `${total} ${t.common.min}`;
   };
 
   const formatTags = (tags: string[] | null) => {
@@ -39,15 +41,13 @@ const FeaturedRecipes = () => {
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Healthy Recipes
+              {t.home.healthyRecipes}
             </h2>
-            <p className="text-muted-foreground">
-              Delicious meals that nourish your body
-            </p>
+            <p className="text-muted-foreground">{t.home.healthyRecipesSubtitle}</p>
           </div>
           <Button asChild variant="ghost" className="hidden sm:flex gap-2">
             <Link to="/recipes">
-              View All <ArrowRight className="w-4 h-4" />
+              {t.common.viewAll} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -68,15 +68,8 @@ const FeaturedRecipes = () => {
             ))
           ) : recipes && recipes.length > 0 ? (
             recipes.map((recipe, index) => (
-              <Link 
-                key={recipe.id} 
-                to={`/recipes/${recipe.slug}`}
-                className="group"
-              >
-                <Card 
-                  className="overflow-hidden card-hover border-border h-full"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+              <Link key={recipe.id} to={`/recipes/${recipe.slug}`} className="group">
+                <Card className="overflow-hidden card-hover border-border h-full" style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="relative overflow-hidden">
                     <img
                       src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}
@@ -98,7 +91,7 @@ const FeaturedRecipes = () => {
                       {recipe.title}
                     </h3>
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{recipe.calories || 0} cal</span>
+                      <span>{recipe.calories || 0} {t.common.cal}</span>
                       <span>{formatTime(recipe.prep_time, recipe.cook_time)}</span>
                     </div>
                   </CardContent>
@@ -107,9 +100,9 @@ const FeaturedRecipes = () => {
             ))
           ) : (
             <div className="col-span-4 text-center py-12">
-              <p className="text-muted-foreground">لا توجد وصفات متاحة حالياً</p>
+              <p className="text-muted-foreground">{t.common.noRecipesAvailable}</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/recipes">استكشف جميع الوصفات</Link>
+                <Link to="/recipes">{t.common.exploreAllRecipes}</Link>
               </Button>
             </div>
           )}
@@ -117,7 +110,7 @@ const FeaturedRecipes = () => {
 
         <div className="mt-8 text-center sm:hidden">
           <Button asChild variant="outline">
-            <Link to="/recipes">View All Recipes</Link>
+            <Link to="/recipes">{t.home.viewAllRecipes}</Link>
           </Button>
         </div>
       </div>

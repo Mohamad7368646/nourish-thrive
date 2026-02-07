@@ -5,52 +5,46 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const seasons = [
-  {
-    id: 'winter',
-    name: 'شتاء',
-    nameEn: 'Winter',
-    icon: Snowflake,
-    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-    borderColor: 'border-blue-200 dark:border-blue-800',
-    description: 'وصفات دافئة ومغذية لأيام الشتاء الباردة',
-    tags: ['winter', 'warm', 'soup'],
-  },
-  {
-    id: 'spring',
-    name: 'ربيع',
-    nameEn: 'Spring',
-    icon: Flower2,
-    color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
-    borderColor: 'border-pink-200 dark:border-pink-800',
-    description: 'وصفات منعشة بالخضروات الربيعية الطازجة',
-    tags: ['spring', 'fresh', 'salad'],
-  },
-  {
-    id: 'summer',
-    name: 'صيف',
-    nameEn: 'Summer',
-    icon: Sun,
-    color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
-    borderColor: 'border-yellow-200 dark:border-yellow-800',
-    description: 'وصفات خفيفة ومنعشة لأيام الصيف الحارة',
-    tags: ['summer', 'light', 'smoothie'],
-  },
-  {
-    id: 'autumn',
-    name: 'خريف',
-    nameEn: 'Autumn',
-    icon: Leaf,
-    color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
-    borderColor: 'border-orange-200 dark:border-orange-800',
-    description: 'وصفات غنية بنكهات الخريف الدافئة',
-    tags: ['autumn', 'pumpkin', 'apple'],
-  },
-];
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const SeasonalRecipesSection = () => {
-  // Get current season based on month
+  const { t } = useLanguage();
+
+  const seasons = [
+    {
+      id: 'winter',
+      name: t.home.winter,
+      icon: Snowflake,
+      color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+      borderColor: 'border-blue-200 dark:border-blue-800',
+      description: t.home.winterDesc,
+    },
+    {
+      id: 'spring',
+      name: t.home.spring,
+      icon: Flower2,
+      color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
+      borderColor: 'border-pink-200 dark:border-pink-800',
+      description: t.home.springDesc,
+    },
+    {
+      id: 'summer',
+      name: t.home.summer,
+      icon: Sun,
+      color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+      borderColor: 'border-yellow-200 dark:border-yellow-800',
+      description: t.home.summerDesc,
+    },
+    {
+      id: 'autumn',
+      name: t.home.autumn,
+      icon: Leaf,
+      color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
+      borderColor: 'border-orange-200 dark:border-orange-800',
+      description: t.home.autumnDesc,
+    },
+  ];
+
   const getCurrentSeason = () => {
     const month = new Date().getMonth();
     if (month >= 2 && month <= 4) return 'spring';
@@ -61,7 +55,6 @@ const SeasonalRecipesSection = () => {
 
   const currentSeason = getCurrentSeason();
 
-  // Fetch recipes from database
   const { data: recipes, isLoading } = useQuery({
     queryKey: ['seasonal-recipes'],
     queryFn: async () => {
@@ -70,17 +63,13 @@ const SeasonalRecipesSection = () => {
         .select('id, title, slug, image_url, prep_time, cook_time, tags, difficulty')
         .eq('published', true)
         .limit(12);
-      
       if (error) throw error;
       return data;
     },
   });
 
-  // Group recipes by season (2 per season)
   const getRecipesForSeason = (seasonId: string) => {
     if (!recipes) return [];
-    
-    // Distribute recipes evenly across seasons
     const seasonIndex = seasons.findIndex(s => s.id === seasonId);
     const startIndex = seasonIndex * 2;
     return recipes.slice(startIndex, startIndex + 2);
@@ -88,8 +77,8 @@ const SeasonalRecipesSection = () => {
 
   const formatTime = (prepTime: number | null, cookTime: number | null) => {
     const total = (prepTime || 0) + (cookTime || 0);
-    if (total === 0) return '15 دقيقة';
-    return `${total} دقيقة`;
+    if (total === 0) return `15 ${t.home.minutes}`;
+    return `${total} ${t.home.minutes}`;
   };
 
   return (
@@ -97,11 +86,9 @@ const SeasonalRecipesSection = () => {
       <div className="container-custom">
         <div className="text-center mb-12">
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
-            وصفات موسمية
+            {t.home.seasonalTitle}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            استمتع بأفضل الوصفات المناسبة لكل فصل من فصول السنة
-          </p>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{t.home.seasonalSubtitle}</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -118,7 +105,6 @@ const SeasonalRecipesSection = () => {
                 }`}
               >
                 <CardContent className="p-0">
-                  {/* Season Header */}
                   <div className={`p-4 ${season.color} flex items-center justify-between`}>
                     <div className="flex items-center gap-2">
                       <SeasonIcon className="w-5 h-5" />
@@ -126,17 +112,13 @@ const SeasonalRecipesSection = () => {
                     </div>
                     {isCurrentSeason && (
                       <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                        الموسم الحالي
+                        {t.common.currentSeason}
                       </span>
                     )}
                   </div>
 
-                  {/* Season Description */}
-                  <p className="text-sm text-muted-foreground p-4 pb-2">
-                    {season.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground p-4 pb-2">{season.description}</p>
 
-                  {/* Recipe Previews */}
                   <div className="p-4 pt-2 space-y-3">
                     {isLoading ? (
                       <>
@@ -180,18 +162,17 @@ const SeasonalRecipesSection = () => {
                       ))
                     ) : (
                       <p className="text-sm text-muted-foreground text-center py-2">
-                        لا توجد وصفات متاحة
+                        {t.common.noRecipesAvailable}
                       </p>
                     )}
                   </div>
 
-                  {/* View All Link */}
                   <div className="px-4 pb-4">
                     <Link
-                      to={`/recipes`}
+                      to="/recipes"
                       className="text-sm text-primary hover:underline flex items-center gap-1"
                     >
-                      عرض جميع وصفات {season.name}
+                      {t.common.viewAllRecipesOf} {season.name}
                       <ArrowRight className="w-3 h-3 rtl:rotate-180" />
                     </Link>
                   </div>
@@ -204,7 +185,7 @@ const SeasonalRecipesSection = () => {
         <div className="mt-10 text-center">
           <Button asChild variant="outline" size="lg">
             <Link to="/recipes" className="gap-2">
-              استكشف جميع الوصفات
+              {t.common.exploreAllRecipes}
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </Link>
           </Button>
