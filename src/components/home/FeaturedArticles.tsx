@@ -6,16 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedArticle } from '@/hooks/useLocalizedArticle';
 
 const FeaturedArticles = () => {
   const { t, language } = useLanguage();
+  const { getTitle, getExcerpt } = useLocalizedArticle();
 
   const { data: articles, isLoading } = useQuery({
     queryKey: ['featured-articles'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, slug, excerpt, image_url, created_at')
+        .select('id, title, title_en, slug, excerpt, excerpt_en, image_url, created_at')
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(3);
@@ -75,10 +77,10 @@ const FeaturedArticles = () => {
                       {new Date(article.created_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
                     </p>
                     <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      {article.title}
+                      {getTitle(article)}
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      {article.excerpt || (language === 'ar' ? 'اكتشف المزيد من المعلومات الصحية المفيدة...' : 'Discover more useful health information...')}
+                      {getExcerpt(article) || (language === 'ar' ? 'اكتشف المزيد من المعلومات الصحية المفيدة...' : 'Discover more useful health information...')}
                     </p>
                   </CardContent>
                 </Card>
