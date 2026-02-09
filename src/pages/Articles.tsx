@@ -9,12 +9,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/layout/Layout';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedArticle } from '@/hooks/useLocalizedArticle';
 
 interface Article {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   excerpt: string | null;
+  excerpt_en: string | null;
   image_url: string | null;
   created_at: string;
   published: boolean | null;
@@ -25,12 +28,13 @@ const Articles = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const { t, language } = useLanguage();
+  const { getTitle, getExcerpt } = useLocalizedArticle();
 
   useEffect(() => {
     const fetchArticles = async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, title, slug, excerpt, image_url, created_at, published')
+        .select('id, title, title_en, slug, excerpt, excerpt_en, image_url, created_at, published')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -44,8 +48,10 @@ const Articles = () => {
   }, []);
 
   const filteredArticles = articles.filter((article) => {
-    return article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (article.excerpt && article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()));
+    const title = getTitle(article).toLowerCase();
+    const excerpt = (getExcerpt(article) || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return title.includes(query) || excerpt.includes(query);
   });
 
   const formatDate = (dateString: string) => {
@@ -155,10 +161,10 @@ const Articles = () => {
                     </div>
                     <CardContent className="p-5">
                       <h3 className="font-serif text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                        {article.title}
+                        {getTitle(article)}
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                        {article.excerpt}
+                        {getExcerpt(article)}
                       </p>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">

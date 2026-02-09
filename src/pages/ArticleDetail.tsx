@@ -10,13 +10,18 @@ import { supabase } from '@/integrations/supabase/client';
 import ArticleSchema from '@/components/seo/ArticleSchema';
 import { ShareButtons } from '@/components/share/ShareButtons';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedArticle } from '@/hooks/useLocalizedArticle';
 
 interface Article {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   content: string | null;
+  content_en: string | null;
   excerpt: string | null;
+  excerpt_en: string | null;
   image_url: string | null;
   created_at: string;
   updated_at?: string;
@@ -25,8 +30,10 @@ interface Article {
 interface RelatedArticle {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   excerpt: string | null;
+  excerpt_en: string | null;
   image_url: string | null;
   created_at: string;
 }
@@ -36,6 +43,8 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState<Article | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language, t } = useLanguage();
+  const { getTitle, getExcerpt, getContent } = useLocalizedArticle();
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -58,7 +67,7 @@ const ArticleDetail = () => {
       // Fetch related articles
       const { data: related } = await supabase
         .from('articles')
-        .select('id, title, slug, excerpt, image_url, created_at')
+        .select('id, title, title_en, slug, excerpt, excerpt_en, image_url, created_at')
         .eq('published', true)
         .neq('id', data.id)
         .limit(3);
@@ -74,7 +83,7 @@ const ArticleDetail = () => {
   }, [slug]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    return new Date(dateString).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -86,10 +95,10 @@ const ArticleDetail = () => {
   };
 
   const getReadTime = (content: string | null) => {
-    if (!content) return '3 دقائق';
+    if (!content) return language === 'ar' ? '3 دقائق' : '3 min read';
     const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
     const minutes = Math.max(3, Math.ceil(words / 200));
-    return `${minutes} دقائق قراءة`;
+    return language === 'ar' ? `${minutes} دقائق قراءة` : `${minutes} min read`;
   };
 
   if (loading) {
@@ -106,13 +115,13 @@ const ArticleDetail = () => {
     return (
       <Layout>
         <Helmet>
-          <title>المقال غير موجود | Healthy Life Hub</title>
+          <title>{language === 'ar' ? 'المقال غير موجود' : 'Article Not Found'} | Healthy Life Hub</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-        <div className="min-h-screen flex flex-col items-center justify-center" dir="rtl">
-          <h1 className="text-2xl font-serif font-bold mb-4">المقال غير موجود</h1>
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-serif font-bold mb-4">{language === 'ar' ? 'المقال غير موجود' : 'Article Not Found'}</h1>
           <Link to="/articles">
-            <Button>العودة للمقالات</Button>
+            <Button>{language === 'ar' ? 'العودة للمقالات' : 'Back to Articles'}</Button>
           </Link>
         </div>
       </Layout>
@@ -125,21 +134,21 @@ const ArticleDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{article.title} | Healthy Life Hub</title>
-        <meta name="title" content={`${article.title} | Healthy Life Hub`} />
-        <meta name="description" content={article.excerpt || ''} />
-        <meta name="keywords" content="صحة, تغذية, مقالات صحية, نصائح طبية, حياة صحية" />
+        <title>{getTitle(article)} | Healthy Life Hub</title>
+        <meta name="title" content={`${getTitle(article)} | Healthy Life Hub`} />
+        <meta name="description" content={getExcerpt(article) || ''} />
+        <meta name="keywords" content={language === 'ar' ? 'صحة, تغذية, مقالات صحية, نصائح طبية, حياة صحية' : 'health, nutrition, healthy articles, medical tips, healthy life'} />
         <link rel="canonical" href={`https://healthylifehub.com${articleUrl}`} />
         
         {/* Open Graph */}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://healthylifehub.com${articleUrl}`} />
-        <meta property="og:title" content={article.title} />
-        <meta property="og:description" content={article.excerpt || ''} />
+        <meta property="og:title" content={getTitle(article)} />
+        <meta property="og:description" content={getExcerpt(article) || ''} />
         <meta property="og:image" content={articleImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={article.title} />
+        <meta property="og:image:alt" content={getTitle(article)} />
         <meta property="article:published_time" content={formatDateISO(article.created_at)} />
         <meta property="article:modified_time" content={formatDateISO(article.updated_at || article.created_at)} />
         <meta property="article:author" content="Healthy Life Hub" />
@@ -148,17 +157,17 @@ const ArticleDetail = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={`https://healthylifehub.com${articleUrl}`} />
-        <meta name="twitter:title" content={article.title} />
-        <meta name="twitter:description" content={article.excerpt || ''} />
+        <meta name="twitter:title" content={getTitle(article)} />
+        <meta name="twitter:description" content={getExcerpt(article) || ''} />
         <meta name="twitter:image" content={articleImage} />
         <meta name="twitter:label1" content="Reading time" />
-        <meta name="twitter:data1" content={getReadTime(article.content)} />
+        <meta name="twitter:data1" content={getReadTime(getContent(article))} />
       </Helmet>
       
       {/* Structured Data */}
       <ArticleSchema
-        title={article.title}
-        description={article.excerpt || ''}
+        title={getTitle(article)}
+        description={getExcerpt(article) || ''}
         image={articleImage}
         url={articleUrl}
         publishedTime={formatDateISO(article.created_at)}
@@ -168,9 +177,9 @@ const ArticleDetail = () => {
       
       <BreadcrumbSchema
         items={[
-          { name: 'الرئيسية', url: '/' },
-          { name: 'المقالات', url: '/articles' },
-          { name: article.title, url: articleUrl },
+          { name: language === 'ar' ? 'الرئيسية' : 'Home', url: '/' },
+          { name: language === 'ar' ? 'المقالات' : 'Articles', url: '/articles' },
+          { name: getTitle(article), url: articleUrl },
         ]}
       />
       
@@ -183,23 +192,23 @@ const ArticleDetail = () => {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8" dir="rtl">
+          <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container mx-auto">
               <nav aria-label="Breadcrumb" className="mb-4">
                 <Link to="/articles" className="inline-flex items-center gap-2 text-primary hover:underline">
-                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                  العودة للمقالات
+                  <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+                  {language === 'ar' ? 'العودة للمقالات' : 'Back to Articles'}
                 </Link>
               </nav>
               <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground max-w-4xl">
-                {article.title}
+                {getTitle(article)}
               </h1>
             </div>
           </div>
         </section>
 
         {/* Article Content */}
-        <article className="py-12" dir="rtl">
+        <article className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Meta Info */}
@@ -210,23 +219,23 @@ const ArticleDetail = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" aria-hidden="true" />
-                  <span>{getReadTime(article.content)}</span>
+                  <span>{getReadTime(getContent(article))}</span>
                 </div>
               </div>
 
               {/* Share Buttons */}
               <ShareButtons 
-                title={article.title} 
-                description={article.excerpt || ''} 
+                title={getTitle(article)} 
+                description={getExcerpt(article) || ''} 
                 className="mb-8"
               />
 
               <Separator className="mb-8" />
 
               {/* Excerpt */}
-              {article.excerpt && (
+              {getExcerpt(article) && (
                 <p className="text-xl text-muted-foreground leading-relaxed mb-8 font-medium">
-                  {article.excerpt}
+                  {getExcerpt(article)}
                 </p>
               )}
 
@@ -242,7 +251,7 @@ const ArticleDetail = () => {
                   prose-li:mb-2
                   prose-a:text-primary prose-a:no-underline hover:prose-a:underline
                   prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: article.content || '' }}
+                dangerouslySetInnerHTML={{ __html: getContent(article) || '' }}
               />
             </div>
           </div>
@@ -250,10 +259,10 @@ const ArticleDetail = () => {
 
         {/* Related Articles */}
         {relatedArticles.length > 0 && (
-          <aside className="py-16 bg-muted/30" dir="rtl" aria-labelledby="related-articles-heading">
+          <aside className="py-16 bg-muted/30" aria-labelledby="related-articles-heading">
             <div className="container mx-auto px-4">
               <h2 id="related-articles-heading" className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
-                مقالات <span className="text-primary">ذات صلة</span>
+                {language === 'ar' ? <>مقالات <span className="text-primary">ذات صلة</span></> : <><span className="text-primary">Related</span> Articles</>}
               </h2>
               <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 {relatedArticles.map((related) => (
@@ -262,17 +271,17 @@ const ArticleDetail = () => {
                       <div className="aspect-video overflow-hidden">
                         <img
                           src={related.image_url || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop'}
-                          alt={related.title}
+                          alt={getTitle(related)}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-serif font-semibold text-foreground line-clamp-2 mb-2">
-                          {related.title}
+                          {getTitle(related)}
                         </h3>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {related.excerpt}
+                          {getExcerpt(related)}
                         </p>
                       </CardContent>
                     </Card>
