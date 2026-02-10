@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedRecipe } from '@/hooks/useLocalizedRecipe';
+import { useLocalizedArticle } from '@/hooks/useLocalizedArticle';
 
 interface SearchResult {
   id: string;
@@ -34,14 +36,16 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { getTitle: getRecipeTitle } = useLocalizedRecipe();
+  const { getTitle: getArticleTitle } = useLocalizedArticle();
 
   const { data: suggestions } = useQuery({
     queryKey: ['search-suggestions'],
     queryFn: async () => {
       const [articlesRes, recipesRes] = await Promise.all([
-        supabase.from('articles').select('id, title, slug, image_url').eq('published', true).order('created_at', { ascending: false }).limit(4),
-        supabase.from('recipes').select('id, title, slug, image_url, tags').eq('published', true).order('created_at', { ascending: false }).limit(4),
+        supabase.from('articles').select('id, title, title_en, slug, image_url').eq('published', true).order('created_at', { ascending: false }).limit(4),
+        supabase.from('recipes').select('id, title, title_en, slug, image_url, tags').eq('published', true).order('created_at', { ascending: false }).limit(4),
       ]);
       return { recentArticles: articlesRes.data || [], recentRecipes: recipesRes.data || [] };
     },
@@ -60,8 +64,8 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
   const autocompleteSuggestions = useMemo(() => {
     if (!query.trim() || query.length < 2) return [];
     const allTitles = [
-      ...(suggestions?.recentArticles?.map(a => ({ title: a.title, type: 'article' as const, slug: a.slug })) || []),
-      ...(suggestions?.recentRecipes?.map(r => ({ title: r.title, type: 'recipe' as const, slug: r.slug })) || []),
+      ...(suggestions?.recentArticles?.map(a => ({ title: getArticleTitle(a), type: 'article' as const, slug: a.slug })) || []),
+      ...(suggestions?.recentRecipes?.map(r => ({ title: getRecipeTitle(r), type: 'recipe' as const, slug: r.slug })) || []),
     ];
     return allTitles.filter(item => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
   }, [query, suggestions]);
@@ -72,8 +76,8 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
       setLoading(true);
       try {
         const searchTerm = `%${query}%`;
-        const { data: articles } = await supabase.from('articles').select('id, title, slug, excerpt, image_url').eq('published', true).or(`title.ilike.${searchTerm},excerpt.ilike.${searchTerm}`).limit(5);
-        const { data: recipes } = await supabase.from('recipes').select('id, title, slug, description, image_url, tags, calories, difficulty').eq('published', true).or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`).limit(5);
+        const { data: articles } = await supabase.from('articles').select('id, title, title_en, slug, excerpt, excerpt_en, image_url').eq('published', true).or(`title.ilike.${searchTerm},excerpt.ilike.${searchTerm},title_en.ilike.${searchTerm},excerpt_en.ilike.${searchTerm}`).limit(5);
+        const { data: recipes } = await supabase.from('recipes').select('id, title, title_en, slug, description, description_en, image_url, tags, calories, difficulty').eq('published', true).or(`title.ilike.${searchTerm},description.ilike.${searchTerm},title_en.ilike.${searchTerm},description_en.ilike.${searchTerm}`).limit(5);
         const articleResults: SearchResult[] = (articles || []).map(a => ({ ...a, type: 'article' as const }));
         const recipeResults: SearchResult[] = (recipes || []).map(r => ({ ...r, type: 'recipe' as const }));
         setResults([...articleResults, ...recipeResults]);
