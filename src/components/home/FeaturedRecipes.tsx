@@ -6,16 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedRecipe } from '@/hooks/useLocalizedRecipe';
 
 const FeaturedRecipes = () => {
   const { t } = useLanguage();
+  const { getTitle } = useLocalizedRecipe();
 
   const { data: recipes, isLoading } = useQuery({
     queryKey: ['featured-recipes'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('recipes')
-        .select('id, title, slug, image_url, calories, prep_time, cook_time, tags')
+        .select('id, title, title_en, slug, image_url, calories, prep_time, cook_time, tags')
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(4);
@@ -73,7 +75,7 @@ const FeaturedRecipes = () => {
                   <div className="relative overflow-hidden">
                     <img
                       src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}
-                      alt={recipe.title}
+                      alt={getTitle(recipe)}
                       className="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
@@ -88,7 +90,7 @@ const FeaturedRecipes = () => {
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-serif font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                      {recipe.title}
+                      {getTitle(recipe)}
                     </h3>
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>{recipe.calories || 0} {t.common.cal}</span>

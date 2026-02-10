@@ -11,12 +11,15 @@ import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedRecipe } from '@/hooks/useLocalizedRecipe';
 
 interface Recipe {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   description: string | null;
+  description_en: string | null;
   image_url: string | null;
   prep_time: number | null;
   cook_time: number | null;
@@ -37,12 +40,13 @@ const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDiet, setSelectedDiet] = useState('All Diets');
   const { t } = useLanguage();
+  const { getTitle, getDescription } = useLocalizedRecipe();
 
   useEffect(() => {
     const fetchRecipes = async () => {
       const { data, error } = await supabase
         .from('recipes')
-        .select('id, title, slug, description, image_url, prep_time, cook_time, servings, difficulty, calories, protein, carbs, fat, tags')
+        .select('id, title, title_en, slug, description, description_en, image_url, prep_time, cook_time, servings, difficulty, calories, protein, carbs, fat, tags')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -56,8 +60,10 @@ const Recipes = () => {
   }, []);
 
   const filteredRecipes = recipes.filter((recipe) => {
-    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const title = getTitle(recipe);
+    const desc = getDescription(recipe);
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (desc && desc.toLowerCase().includes(searchQuery.toLowerCase()));
     const normalize = (s: string) => s.toLowerCase().replace(/[-\s]/g, '');
     const matchesDiet = selectedDiet === 'All Diets' || 
       (recipe.tags && recipe.tags.some(tag => 
@@ -208,7 +214,7 @@ const Recipes = () => {
                     <div className="relative overflow-hidden">
                       <img
                         src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}
-                        alt={recipe.title}
+                        alt={getTitle(recipe)}
                         className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute top-3 end-3 bg-card/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
@@ -232,10 +238,10 @@ const Recipes = () => {
                         {getDifficultyLabel(recipe.difficulty)}
                       </Badge>
                       <h3 className="font-serif font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                        {recipe.title}
+                        {getTitle(recipe)}
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                        {recipe.description}
+                        {getDescription(recipe)}
                       </p>
                       
                       {/* Nutritional Info */}

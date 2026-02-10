@@ -10,12 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 import RecipeSchema from '@/components/seo/RecipeSchema';
 import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
 import { ShareButtons } from '@/components/share/ShareButtons';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedRecipe } from '@/hooks/useLocalizedRecipe';
 
 interface Recipe {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   description: string | null;
+  description_en: string | null;
   image_url: string | null;
   prep_time: number | null;
   cook_time: number | null;
@@ -35,6 +39,7 @@ interface Recipe {
 interface RelatedRecipe {
   id: string;
   title: string;
+  title_en: string | null;
   slug: string;
   image_url: string | null;
   calories: number | null;
@@ -47,6 +52,8 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [relatedRecipes, setRelatedRecipes] = useState<RelatedRecipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
+  const { getTitle, getDescription } = useLocalizedRecipe();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -76,7 +83,7 @@ const RecipeDetail = () => {
       // Fetch related recipes
       const { data: related } = await supabase
         .from('recipes')
-        .select('id, title, slug, image_url, calories, prep_time, cook_time')
+        .select('id, title, title_en, slug, image_url, calories, prep_time, cook_time')
         .eq('published', true)
         .neq('id', data.id)
         .limit(3);
@@ -103,10 +110,10 @@ const RecipeDetail = () => {
 
   const getDifficultyLabel = (difficulty: string | null) => {
     switch (difficulty) {
-      case 'easy': return 'Easy';
-      case 'medium': return 'Medium';
-      case 'hard': return 'Hard';
-      default: return 'Easy';
+      case 'easy': return t.common.easy;
+      case 'medium': return t.common.medium;
+      case 'hard': return t.common.hard;
+      default: return t.common.easy;
     }
   };
 
@@ -144,27 +151,27 @@ const RecipeDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{recipe.title} | Healthy Life Hub Recipes</title>
-        <meta name="title" content={`${recipe.title} | Healthy Life Hub Recipes`} />
-        <meta name="description" content={recipe.description || `Healthy ${recipe.title} recipe with ${recipe.calories || 0} calories per serving. Ready in ${totalTime} minutes.`} />
+        <title>{getTitle(recipe)} | Healthy Life Hub Recipes</title>
+        <meta name="title" content={`${getTitle(recipe)} | Healthy Life Hub Recipes`} />
+        <meta name="description" content={getDescription(recipe) || `Healthy ${getTitle(recipe)} recipe with ${recipe.calories || 0} calories per serving. Ready in ${totalTime} minutes.`} />
         <meta name="keywords" content={`${recipe.title}, healthy recipe, ${recipe.tags?.join(', ') || 'nutritious meal'}, low calorie, healthy cooking`} />
         <link rel="canonical" href={`https://healthylifehub.com${recipeUrl}`} />
         
         {/* Open Graph */}
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://healthylifehub.com${recipeUrl}`} />
-        <meta property="og:title" content={recipe.title} />
-        <meta property="og:description" content={recipe.description || ''} />
+        <meta property="og:title" content={getTitle(recipe)} />
+        <meta property="og:description" content={getDescription(recipe) || ''} />
         <meta property="og:image" content={recipeImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={recipe.title} />
+        <meta property="og:image:alt" content={getTitle(recipe)} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={`https://healthylifehub.com${recipeUrl}`} />
-        <meta name="twitter:title" content={recipe.title} />
-        <meta name="twitter:description" content={recipe.description || ''} />
+        <meta name="twitter:title" content={getTitle(recipe)} />
+        <meta name="twitter:description" content={getDescription(recipe) || ''} />
         <meta name="twitter:image" content={recipeImage} />
         <meta name="twitter:label1" content="Time" />
         <meta name="twitter:data1" content={`${totalTime} min`} />
@@ -174,8 +181,8 @@ const RecipeDetail = () => {
       
       {/* Structured Data */}
       <RecipeSchema
-        title={recipe.title}
-        description={recipe.description || ''}
+        title={getTitle(recipe)}
+        description={getDescription(recipe) || ''}
         image={recipeImage}
         url={recipeUrl}
         prepTime={recipe.prep_time || 0}
@@ -191,9 +198,9 @@ const RecipeDetail = () => {
       
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: '/' },
-          { name: 'Recipes', url: '/recipes' },
-          { name: recipe.title, url: recipeUrl },
+          { name: t.nav.home, url: '/' },
+          { name: t.nav.recipes, url: '/recipes' },
+          { name: getTitle(recipe), url: recipeUrl },
         ]}
       />
       
@@ -202,7 +209,7 @@ const RecipeDetail = () => {
         <section className="relative h-[50vh] min-h-[400px]">
           <img
             src={recipeImage}
-            alt={recipe.title}
+            alt={getTitle(recipe)}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
@@ -211,7 +218,7 @@ const RecipeDetail = () => {
               <nav aria-label="Breadcrumb" className="mb-4">
                 <Link to="/recipes" className="inline-flex items-center gap-2 text-primary hover:underline">
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-                  Back to Recipes
+                  {t.nav.recipes}
                 </Link>
               </nav>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -221,7 +228,7 @@ const RecipeDetail = () => {
                 ))}
               </div>
               <h1 className="font-serif text-3xl md:text-5xl font-bold text-foreground max-w-4xl">
-                {recipe.title}
+                {getTitle(recipe)}
               </h1>
             </div>
           </div>
@@ -258,13 +265,13 @@ const RecipeDetail = () => {
 
               {/* Share Button */}
               <ShareButtons 
-                title={recipe.title} 
-                description={recipe.description || ''} 
+                title={getTitle(recipe)} 
+                description={getDescription(recipe) || ''} 
                 className="mb-8"
               />
 
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                {recipe.description}
+                {getDescription(recipe)}
               </p>
 
               {/* Nutrition Facts */}
@@ -361,7 +368,7 @@ const RecipeDetail = () => {
           <aside className="py-16 bg-muted/30" aria-labelledby="related-recipes-heading">
             <div className="container mx-auto px-4">
               <h2 id="related-recipes-heading" className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
-                You Might Also <span className="text-primary">Like</span>
+                {t.nav.recipes}
               </h2>
               <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 {relatedRecipes.map((related) => (
@@ -370,14 +377,14 @@ const RecipeDetail = () => {
                       <div className="aspect-video overflow-hidden">
                         <img
                           src={related.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=250&fit=crop'}
-                          alt={related.title}
+                          alt={getTitle(related)}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-serif font-semibold text-foreground line-clamp-2 mb-2">
-                          {related.title}
+                          {getTitle(related)}
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">

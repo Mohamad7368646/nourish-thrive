@@ -6,9 +6,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useLocalizedRecipe } from '@/hooks/useLocalizedRecipe';
 
 const SeasonalRecipesSection = () => {
   const { t } = useLanguage();
+  const { getTitle } = useLocalizedRecipe();
 
   const seasons = [
     {
@@ -60,7 +62,7 @@ const SeasonalRecipesSection = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('recipes')
-        .select('id, title, slug, image_url, prep_time, cook_time, tags, difficulty')
+        .select('id, title, title_en, slug, image_url, prep_time, cook_time, tags, difficulty')
         .eq('published', true)
         .limit(12);
       if (error) throw error;
@@ -146,12 +148,12 @@ const SeasonalRecipesSection = () => {
                         >
                           <img
                             src={recipe.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'}
-                            alt={recipe.title}
+                            alt={getTitle(recipe)}
                             className="w-12 h-12 rounded-lg object-cover transition-transform group-hover/recipe:scale-105"
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-foreground truncate group-hover/recipe:text-primary transition-colors">
-                              {recipe.title}
+                              {getTitle(recipe)}
                             </p>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="w-3 h-3" />

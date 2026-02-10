@@ -87,6 +87,7 @@ export type Database = {
           cook_time: number | null
           created_at: string
           description: string | null
+          description_en: string | null
           difficulty: string | null
           fat: number | null
           fiber: number | null
@@ -101,6 +102,7 @@ export type Database = {
           slug: string
           tags: string[] | null
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
@@ -109,6 +111,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           difficulty?: string | null
           fat?: number | null
           fiber?: number | null
@@ -123,6 +126,7 @@ export type Database = {
           slug: string
           tags?: string[] | null
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
@@ -131,6 +135,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           difficulty?: string | null
           fat?: number | null
           fiber?: number | null
@@ -145,6 +150,7 @@ export type Database = {
           slug?: string
           tags?: string[] | null
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []
