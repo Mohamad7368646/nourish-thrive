@@ -21,6 +21,7 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
+import Cookies from "./pages/Cookies";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ArticlesAdmin from "./pages/admin/ArticlesAdmin";
@@ -43,6 +44,7 @@ function AppRoutes() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/cookies" element={<Cookies />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/search" element={<Search />} />
       <Route path="/admin" element={<AdminLayout />}>
