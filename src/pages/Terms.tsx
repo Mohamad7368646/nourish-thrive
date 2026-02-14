@@ -10,6 +10,7 @@ const Terms = () => {
       <Helmet>
         <title>{t.termsPage.title} {t.termsPage.titleHighlight} | Healthy Life Hub</title>
         <meta name="description" content="Read Healthy Life Hub's terms of service." />
+        <link rel="canonical" href="https://healthylifehub.com/terms" />
       </Helmet>
       <Layout>
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">

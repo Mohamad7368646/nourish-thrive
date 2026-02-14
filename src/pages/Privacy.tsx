@@ -10,6 +10,7 @@ const Privacy = () => {
       <Helmet>
         <title>{t.privacyPage.title} {t.privacyPage.titleHighlight} | Healthy Life Hub</title>
         <meta name="description" content="Read Healthy Life Hub's privacy policy." />
+        <link rel="canonical" href="https://healthylifehub.com/privacy" />
       </Helmet>
       <Layout>
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">

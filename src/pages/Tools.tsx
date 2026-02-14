@@ -95,6 +95,7 @@ const Tools = () => {
       <Helmet>
         <title>{t.toolsPage.title} {t.toolsPage.titleHighlight} | Healthy Life Hub</title>
         <meta name="description" content={t.toolsPage.subtitle} />
+        <link rel="canonical" href="https://healthylifehub.com/tools" />
       </Helmet>
       <Layout>
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">

@@ -11,6 +11,7 @@ const Cookies = () => {
       <Helmet>
         <title>{isEn ? 'Cookie Policy | Healthy Life Hub' : 'سياسة ملفات تعريف الارتباط | Healthy Life Hub'}</title>
         <meta name="description" content={isEn ? "Learn about how Healthy Life Hub uses cookies." : "تعرف على كيفية استخدام Healthy Life Hub لملفات تعريف الارتباط."} />
+        <link rel="canonical" href="https://healthylifehub.com/cookies" />
       </Helmet>
       <Layout>
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">
