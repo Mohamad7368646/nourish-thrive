@@ -56,6 +56,7 @@ const Contact = () => {
       <Helmet>
         <title>{t.contactPage.title} {t.contactPage.titleHighlight} | Healthy Life Hub</title>
         <meta name="description" content={t.contactPage.subtitle} />
+        <link rel="canonical" href="https://healthylifehub.com/contact" />
       </Helmet>
       <Layout>
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">
