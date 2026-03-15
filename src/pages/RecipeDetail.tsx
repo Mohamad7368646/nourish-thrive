@@ -30,8 +30,8 @@ interface Recipe {
   carbs: number | null;
   fat: number | null;
   fiber: number | null;
-  ingredients: unknown[] | null;
-  instructions: unknown[] | null;
+  ingredients: string[] | null;
+  instructions: string[] | null;
   tags: string[] | null;
   created_at?: string;
 }
