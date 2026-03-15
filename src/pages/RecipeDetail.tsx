@@ -71,11 +71,43 @@ const RecipeDetail = () => {
         return;
       }
 
-      // Parse JSONB fields
+      // Parse JSONB fields - handle both string arrays and object arrays
+      const parseIngredients = (raw: unknown): string[] => {
+        if (!raw || !Array.isArray(raw)) return [];
+        return raw.map((item: unknown) => {
+          if (typeof item === 'string') return item;
+          if (typeof item === 'object' && item !== null) {
+            const obj = item as Record<string, unknown>;
+            if (obj.item && obj.amount) return `${obj.amount} ${obj.item}`;
+            if (obj.item) return String(obj.item);
+            if (obj.name && obj.quantity) return `${obj.quantity} ${obj.name}`;
+            if (obj.name) return String(obj.name);
+            return JSON.stringify(item);
+          }
+          return String(item);
+        });
+      };
+
+      const parseInstructions = (raw: unknown): string[] => {
+        if (!raw || !Array.isArray(raw)) return [];
+        return raw.map((item: unknown) => {
+          if (typeof item === 'string') return item;
+          if (typeof item === 'object' && item !== null) {
+            const obj = item as Record<string, unknown>;
+            if (obj.instruction) return String(obj.instruction);
+            if (obj.step && obj.instruction) return String(obj.instruction);
+            if (obj.text) return String(obj.text);
+            if (obj.description) return String(obj.description);
+            return JSON.stringify(item);
+          }
+          return String(item);
+        });
+      };
+
       const parsedRecipe: Recipe = {
         ...data,
-        ingredients: data.ingredients as string[] | null,
-        instructions: data.instructions as string[] | null,
+        ingredients: parseIngredients(data.ingredients),
+        instructions: parseInstructions(data.instructions),
       };
 
       setRecipe(parsedRecipe);
