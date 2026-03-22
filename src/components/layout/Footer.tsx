@@ -1,13 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Leaf, Mail, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Leaf, Mail } from 'lucide-react';
 import { useLanguage } from '@/i18n/LanguageContext';
-
-const socialLinks = [
-  { name: 'Facebook', icon: Facebook, href: '#' },
-  { name: 'Twitter', icon: Twitter, href: '#' },
-  { name: 'Instagram', icon: Instagram, href: '#' },
-  { name: 'YouTube', icon: Youtube, href: '#' },
-];
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -15,12 +8,10 @@ const Footer = () => {
   const footerLinks = {
     explore: [
       { name: t.nav.articles, href: '/articles' },
-      { name: t.nav.recipes, href: '/recipes' },
       { name: t.footer.healthTools, href: '/tools' },
     ],
     company: [
       { name: t.footer.aboutUs, href: '/about' },
-      { name: t.nav.contact, href: '/contact' },
     ],
     legal: [
       { name: t.footer.privacyPolicy, href: '/privacy' },
@@ -32,9 +23,9 @@ const Footer = () => {
   return (
     <footer className="bg-card border-t border-border">
       <div className="container-custom py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
+          <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-primary-foreground" />
@@ -69,10 +60,7 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.explore.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground text-sm hover:text-primary transition-colors"
-                  >
+                  <Link to={link.href} className="text-muted-foreground text-sm hover:text-primary transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -86,10 +74,7 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground text-sm hover:text-primary transition-colors"
-                  >
+                  <Link to={link.href} className="text-muted-foreground text-sm hover:text-primary transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -103,10 +88,7 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground text-sm hover:text-primary transition-colors"
-                  >
+                  <Link to={link.href} className="text-muted-foreground text-sm hover:text-primary transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -116,24 +98,10 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-border flex items-center justify-center">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} HealthyLife Hub. {t.footer.allRightsReserved}
           </p>
-          
-          {/* Social Links */}
-          <div className="flex items-center gap-3">
-            {socialLinks.map((social) => (
-              <a
-                key={social.name}
-                href={social.href}
-                className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-                aria-label={social.name}
-              >
-                <social.icon className="w-4 h-4" />
-              </a>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

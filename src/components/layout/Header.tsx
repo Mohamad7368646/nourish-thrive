@@ -17,10 +17,8 @@ const Header = () => {
   const navigation = [
     { name: t.nav.home, href: '/' },
     { name: t.nav.articles, href: '/articles' },
-    { name: t.nav.recipes, href: '/recipes' },
     { name: t.nav.tools, href: '/tools' },
     { name: t.nav.about, href: '/about' },
-    { name: t.nav.contact, href: '/contact' },
   ];
 
   const isActive = (href: string) => {
