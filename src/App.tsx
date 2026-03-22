@@ -11,11 +11,8 @@ import { useVisitTracker } from "@/hooks/useVisitTracker";
 import Index from "./pages/Index";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
-import Recipes from "./pages/Recipes";
-import RecipeDetail from "./pages/RecipeDetail";
 import Tools from "./pages/Tools";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
@@ -37,11 +34,8 @@ function AppRoutes() {
       <Route path="/" element={<Index />} />
       <Route path="/articles" element={<Articles />} />
       <Route path="/articles/:slug" element={<ArticleDetail />} />
-      <Route path="/recipes" element={<Recipes />} />
-      <Route path="/recipes/:slug" element={<RecipeDetail />} />
       <Route path="/tools" element={<Tools />} />
       <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/cookies" element={<Cookies />} />

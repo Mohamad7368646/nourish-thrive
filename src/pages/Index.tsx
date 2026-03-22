@@ -1,9 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calculator, Heart, Users, TrendingUp, Leaf, Apple, Dumbbell, BookOpen, Utensils } from 'lucide-react';
-import SeasonalRecipesSection from '@/components/home/SeasonalRecipesSection';
+import { ArrowRight, Calculator, Heart, Users, TrendingUp, Leaf, Apple, Dumbbell, BookOpen } from 'lucide-react';
 import FeaturedArticles from '@/components/home/FeaturedArticles';
-import FeaturedRecipes from '@/components/home/FeaturedRecipes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Layout from '@/components/layout/Layout';
@@ -38,39 +36,17 @@ const Index = () => {
 
   const stats = [
     { value: '500+', label: t.home.statsArticles, icon: BookOpen },
-    { value: '300+', label: t.home.statsRecipes, icon: Utensils },
     { value: '50K+', label: t.home.statsReaders, icon: Users },
     { value: '98%', label: t.home.statsSatisfaction, icon: Heart },
   ];
 
-  // Home page structured data
   const homeSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'Healthy Life Hub - Your Complete Guide to Nutrition & Wellness',
-    description: 'Discover evidence-based nutrition advice, healthy recipes, and wellness tools. Start your journey to a healthier lifestyle.',
+    description: 'Discover evidence-based nutrition advice and wellness tools. Start your journey to a healthier lifestyle.',
     url: 'https://healthylifehub.com',
-    mainEntity: {
-      '@type': 'HealthTopicContent',
-      about: {
-        '@type': 'MedicalCondition',
-        name: 'Nutrition and Wellness',
-      },
-    },
     specialty: ['Nutrition', 'Healthy Eating', 'Fitness', 'Wellness'],
-  };
-
-  const collectionSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: 'Healthy Life Hub',
-    description: 'A comprehensive collection of health articles, nutritious recipes, and wellness tools',
-    url: 'https://healthylifehub.com',
-    hasPart: [
-      { '@type': 'WebPageElement', name: 'Health Articles', url: 'https://healthylifehub.com/articles' },
-      { '@type': 'WebPageElement', name: 'Healthy Recipes', url: 'https://healthylifehub.com/recipes' },
-      { '@type': 'WebPageElement', name: 'Health Tools', url: 'https://healthylifehub.com/tools' },
-    ],
   };
 
   return (
@@ -87,7 +63,6 @@ const Index = () => {
         <meta property="og:locale" content={language === 'ar' ? 'ar_SA' : 'en_US'} />
         <meta name="twitter:card" content="summary_large_image" />
         <script type="application/ld+json">{JSON.stringify(homeSchema)}</script>
-        <script type="application/ld+json">{JSON.stringify(collectionSchema)}</script>
       </Helmet>
 
       {/* Hero Section */}
@@ -120,7 +95,7 @@ const Index = () => {
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link to="/recipes">{t.home.browseRecipes}</Link>
+                    <Link to="/tools">{t.home.exploreAllTools}</Link>
                   </Button>
                 </div>
               </div>
@@ -152,8 +127,8 @@ const Index = () => {
                       <Apple className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-foreground">{t.home.recipesCount}</p>
-                      <p className="text-xs text-muted-foreground">{t.home.recipesLabel}</p>
+                      <p className="font-bold text-foreground">500+</p>
+                      <p className="text-xs text-muted-foreground">{t.home.statsArticles}</p>
                     </div>
                   </div>
                 </div>
@@ -166,7 +141,7 @@ const Index = () => {
       {/* Stats Section */}
       <section className="py-12 bg-primary text-primary-foreground">
         <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <div key={stat.label} className="text-center" style={{ animationDelay: `${index * 0.1}s` }}>
                 <stat.icon className="w-8 h-8 mx-auto mb-2 opacity-80" aria-hidden="true" />
@@ -217,9 +192,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      <SeasonalRecipesSection />
-      <FeaturedRecipes />
 
       {/* CTA Section */}
       <section className="section-padding bg-primary text-primary-foreground relative overflow-hidden">
